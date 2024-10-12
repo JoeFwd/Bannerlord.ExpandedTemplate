@@ -32,10 +32,3 @@ jobs:
       - name: Push to NuGet
         run: dotnet nuget push "./packages/*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s https://www.nuget.org --skip-duplicate
         shell: pwsh
-
-      - name: Push to GPR
-        run: |
-          for f in ./packages/*.nupkg
-          do
-            curl --fail-with-body -vX PUT -u "${{ secrets.PACKAGE_GITHUB_USER }}:${{ secrets.PACKAGE_GITHUB_TOKEN }}"  -F package=@$f https://nuget.pkg.github.com/JoeFwd/
-          done
