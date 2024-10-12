@@ -11,18 +11,21 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.Tests.EquipmentPool.List.Pr
 public class SiegeEquipmentPoolProviderShould
 {
     private const string CachedObjectId = "irrelevant_cached_object_id";
-    
-    private const string ValidSiegeEquipmentDataFolderPath = "Data\\SiegeEquipmentPoolProvider\\ValidSymbols";
-    private const string InvalidSiegeEquipmentDataFolderPath = "Data\\SiegeEquipmentPoolProvider\\InvalidSymbols";
 
-    private const string MultipleEquipmentRepositoriesDataFolderPath =
-        "Data\\SiegeEquipmentPoolProvider\\MultipleRepos";
+    private readonly string _validSiegeEquipmentDataFolderPath =
+        Path.Combine("Data", "SiegeEquipmentPoolProvider", "ValidSymbols");
 
-    private const string FirstEquipmentRepositoryDataFolderPath =
-        "Data\\SiegeEquipmentPoolProvider\\MultipleRepos\\FirstRepo";
+    private readonly string _invalidSiegeEquipmentDataFolderPath =
+        Path.Combine("Data", "SiegeEquipmentPoolProvider", "InvalidSymbols");
 
-    private const string SecondEquipmentRepositoryDataFolderPath =
-        "Data\\SiegeEquipmentPoolProvider\\MultipleRepos\\SecondRepo";
+    private readonly string _multipleEquipmentRepositoriesDataFolderPath =
+        Path.Combine("Data", "SiegeEquipmentPoolProvider", "MultipleRepos");
+
+    private readonly string _firstEquipmentRepositoryDataFolderPath =
+        Path.Combine("Data", "SiegeEquipmentPoolProvider", "MultipleRepos", "FirstRepo");
+
+    private readonly string _secondEquipmentRepositoryDataFolderPath =
+        Path.Combine("Data", "SiegeEquipmentPoolProvider", "MultipleRepos", "SecondRepo");
 
     private Mock<ICacheProvider> _cacheProvider;
     private Mock<ILogger> _logger;
@@ -42,13 +45,13 @@ public class SiegeEquipmentPoolProviderShould
     public void GetEquipmentPoolsFromSingleRepository()
     {
         var characterEquipmentRepository =
-            CreateEquipmentRepository(InputFolder(ValidSiegeEquipmentDataFolderPath));
+            CreateEquipmentRepository(InputFolder(_validSiegeEquipmentDataFolderPath));
         var troopEquipmentReader =
             new SiegeEquipmentPoolProvider(_loggerFactory.Object, _cacheProvider.Object, characterEquipmentRepository);
         
         var allTroopEquipmentPools = troopEquipmentReader.GetSiegeEquipmentByCharacterAndPool();
 
-        AssertCharacterEquipmentPools(ExpectedFolder(ValidSiegeEquipmentDataFolderPath),
+        AssertCharacterEquipmentPools(ExpectedFolder(_validSiegeEquipmentDataFolderPath),
             allTroopEquipmentPools);
     }
 
@@ -56,9 +59,9 @@ public class SiegeEquipmentPoolProviderShould
     public void GetEquipmentPoolsFromMultipleRepositories()
     {
         var firstEquipmentRepository =
-            CreateEquipmentRepository(InputFolder(FirstEquipmentRepositoryDataFolderPath));
+            CreateEquipmentRepository(InputFolder(_firstEquipmentRepositoryDataFolderPath));
         var secondEquipmentRepository =
-            CreateEquipmentRepository(InputFolder(SecondEquipmentRepositoryDataFolderPath));
+            CreateEquipmentRepository(InputFolder(_secondEquipmentRepositoryDataFolderPath));
         var troopEquipmentReader =
             new SiegeEquipmentPoolProvider(_loggerFactory.Object, _cacheProvider.Object, firstEquipmentRepository,
                 secondEquipmentRepository);
@@ -70,7 +73,7 @@ public class SiegeEquipmentPoolProviderShould
 
         var allTroopEquipmentPools = troopEquipmentReader.GetSiegeEquipmentByCharacterAndPool();
 
-        AssertCharacterEquipmentPools(ExpectedFolder(MultipleEquipmentRepositoriesDataFolderPath),
+        AssertCharacterEquipmentPools(ExpectedFolder(_multipleEquipmentRepositoriesDataFolderPath),
             allTroopEquipmentPools);
         _logger.Verify(
             logger => logger.Warn(
@@ -84,7 +87,7 @@ public class SiegeEquipmentPoolProviderShould
     {
         var recruitId = "vlandian_recruit";
         var characterEquipmentRepository =
-            CreateEquipmentRepository(InputFolder(InvalidSiegeEquipmentDataFolderPath));
+            CreateEquipmentRepository(InputFolder(_invalidSiegeEquipmentDataFolderPath));
         var troopEquipmentReader =
             new SiegeEquipmentPoolProvider(_loggerFactory.Object, _cacheProvider.Object, characterEquipmentRepository);
 
@@ -99,7 +102,7 @@ public class SiegeEquipmentPoolProviderShould
     public void GetCachedEquipmentPools()
     {
         var characterEquipmentRepository =
-            CreateEquipmentRepository(InputFolder(InvalidSiegeEquipmentDataFolderPath));
+            CreateEquipmentRepository(InputFolder(_invalidSiegeEquipmentDataFolderPath));
         var troopEquipmentReader =
             new SiegeEquipmentPoolProvider(_loggerFactory.Object, _cacheProvider.Object, characterEquipmentRepository);
 
