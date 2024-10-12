@@ -6,6 +6,9 @@
     <Platforms>x64</Platforms>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
+
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
