@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>$(BuildVersion)</Version>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <Platforms>x64</Platforms>
+        <LangVersion>12.0</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(BannerlordVersion).*-*" PrivateAssets="All" />
+        
+        <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Integration\Bannerlord.ExpandedTemplate.Integration.csproj" />
+    </ItemGroup>
+
+</Project>

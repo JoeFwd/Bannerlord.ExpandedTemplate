@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <BuildVersion>1.0.0</BuildVersion>
+    <BannerlordVersion>1.2.11</BannerlordVersion>
+  </PropertyGroup>
+</Project>

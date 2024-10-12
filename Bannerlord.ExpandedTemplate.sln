@@ -1,0 +1,88 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Integration", "Bannerlord.ExpandedTemplate.Integration\Bannerlord.ExpandedTemplate.Integration.csproj", "{E1047BC3-78A9-444C-B74F-41E1B9744ED3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12CCA2B5-A874-47B3-BB43-799275014D7B}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Domain", "Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj", "{59DCCF2D-7980-41DD-8BB5-16185CFDBE7D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Domain.Tests", "Bannerlord.ExpandedTemplate.Domain.Tests\Bannerlord.ExpandedTemplate.Domain.Tests.csproj", "{47FF07B2-A1AB-4152-8A76-C786487189F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Infrastructure", "Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj", "{423C424E-22F0-464D-97AB-69E0E00D5F51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Infrastructure.Tests", "Bannerlord.ExpandedTemplate.Infrastructure.Tests\Bannerlord.ExpandedTemplate.Infrastructure.Tests.csproj", "{3FA3639C-31CF-45D6-8AE0-12C99A663281}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{246CE6A0-BDD4-4AEA-9CCF-FA6561AF5EE6}"
+	ProjectSection(SolutionItems) = preProject
+		docs\expanded-equipment-api.md = docs\expanded-equipment-api.md
+		docs\csharp-api.md = docs\csharp-api.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.API", "Bannerlord.ExpandedTemplate.API\Bannerlord.ExpandedTemplate.API.csproj", "{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FADBAEB6-007A-4309-8193-42946046B25E}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{1F5484D1-906A-4CD6-9AA0-7E8B5724824E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{F3288B67-F1AA-4654-B4EA-8E09D5E6A181}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E1047BC3-78A9-444C-B74F-41E1B9744ED3}.Debug|x64.ActiveCfg = Debug|x64
+		{E1047BC3-78A9-444C-B74F-41E1B9744ED3}.Debug|x64.Build.0 = Debug|x64
+		{E1047BC3-78A9-444C-B74F-41E1B9744ED3}.Release|x64.ActiveCfg = Release|x64
+		{E1047BC3-78A9-444C-B74F-41E1B9744ED3}.Release|x64.Build.0 = Release|x64
+
+		{17F43D01-48C7-43DC-A6E6-28C303AAC8DB}.Debug|x64.ActiveCfg = Debug|x64
+		{17F43D01-48C7-43DC-A6E6-28C303AAC8DB}.Debug|x64.Build.0 = Debug|x64
+		{17F43D01-48C7-43DC-A6E6-28C303AAC8DB}.Release|x64.ActiveCfg = Release|x64
+		{17F43D01-48C7-43DC-A6E6-28C303AAC8DB}.Release|x64.Build.0 = Release|x64
+
+		{59DCCF2D-7980-41DD-8BB5-16185CFDBE7D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{59DCCF2D-7980-41DD-8BB5-16185CFDBE7D}.Debug|x64.Build.0 = Debug|Any CPU
+		{59DCCF2D-7980-41DD-8BB5-16185CFDBE7D}.Release|x64.ActiveCfg = Release|Any CPU
+		{59DCCF2D-7980-41DD-8BB5-16185CFDBE7D}.Release|x64.Build.0 = Release|Any CPU
+		{47FF07B2-A1AB-4152-8A76-C786487189F2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47FF07B2-A1AB-4152-8A76-C786487189F2}.Debug|x64.Build.0 = Debug|Any CPU
+		{47FF07B2-A1AB-4152-8A76-C786487189F2}.Release|x64.ActiveCfg = Release|Any CPU
+		{47FF07B2-A1AB-4152-8A76-C786487189F2}.Release|x64.Build.0 = Release|Any CPU
+		{423C424E-22F0-464D-97AB-69E0E00D5F51}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{423C424E-22F0-464D-97AB-69E0E00D5F51}.Debug|x64.Build.0 = Debug|Any CPU
+		{423C424E-22F0-464D-97AB-69E0E00D5F51}.Release|x64.ActiveCfg = Release|Any CPU
+		{423C424E-22F0-464D-97AB-69E0E00D5F51}.Release|x64.Build.0 = Release|Any CPU
+		{3FA3639C-31CF-45D6-8AE0-12C99A663281}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3FA3639C-31CF-45D6-8AE0-12C99A663281}.Debug|x64.Build.0 = Debug|Any CPU
+		{3FA3639C-31CF-45D6-8AE0-12C99A663281}.Release|x64.ActiveCfg = Release|Any CPU
+		{3FA3639C-31CF-45D6-8AE0-12C99A663281}.Release|x64.Build.0 = Release|Any CPU
+		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Debug|x64.Build.0 = Debug|Any CPU
+		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Release|x64.ActiveCfg = Release|Any CPU
+		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{246CE6A0-BDD4-4AEA-9CCF-FA6561AF5EE6} = {12CCA2B5-A874-47B3-BB43-799275014D7B}
+		{FADBAEB6-007A-4309-8193-42946046B25E} = {12CCA2B5-A874-47B3-BB43-799275014D7B}
+		{1F5484D1-906A-4CD6-9AA0-7E8B5724824E} = {12CCA2B5-A874-47B3-BB43-799275014D7B}
+		{F3288B67-F1AA-4654-B4EA-8E09D5E6A181} = {1F5484D1-906A-4CD6-9AA0-7E8B5724824E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B3D4AB65-9162-4EE2-9413-1867C12DC041}
+	EndGlobalSection
+EndGlobal
