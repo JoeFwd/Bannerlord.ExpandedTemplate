@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- This is SubModule.xml file is for testing purposes -->
+<Module>
+  <Id value="$moduleid$" />
+  <Name value="$modulename$" />
+  <Version value="v$version$" />
+  <DefaultModule value="false" />
+  <ModuleCategory value="Singleplayer"/>
+  <ModuleType value="Community" />
+  <!-- Community Dependency Metadata -->
+  <DependedModules>
+    <DependedModule Id="Native" DependentVersion="$gameversion$"/>
+    <DependedModule Id="Sandbox" DependentVersion="$gameversion$"/>
+  </DependedModules>
+  <!-- Community Dependency Metadata -->
+  <!-- https://github.com/BUTR/Bannerlord.BLSE#community-dependency-metadata -->
+  <DependedModuleMetadatas>
+    <DependedModuleMetadata id="Native" order="LoadBeforeThis" version="$gameversion$.*"/>
+    <DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="$gameversion$.*"/>
+  </DependedModuleMetadatas>
+  <SubModules>
+    <SubModule>
+      <Name value="Bannerlord.ExpandedTemplate" />
+      <DLLName value="Bannerlord.ExpandedTemplate.Integration.dll" />
+      <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.SubModule" />
+      <Tags />
+    </SubModule>
+  </SubModules>
+  <Xmls/>
+</Module>

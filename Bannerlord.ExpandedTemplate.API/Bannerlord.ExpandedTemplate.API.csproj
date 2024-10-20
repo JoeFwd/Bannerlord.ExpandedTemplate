@@ -12,7 +12,7 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(BannerlordVersion).*-*" PrivateAssets="All" />
+        <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(GameVersion).*-*" PrivateAssets="All"/>
         
         <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Integration\Bannerlord.ExpandedTemplate.Integration.csproj" />
     </ItemGroup>

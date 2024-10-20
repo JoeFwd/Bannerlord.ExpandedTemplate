@@ -22,7 +22,7 @@ using TaleWorlds.ObjectSystem;
 
 namespace Bannerlord.ExpandedTemplate.Integration
 {
-    public class ExpandedTemplateSubModule : MBSubModuleBase
+    public class SubModule : MBSubModuleBase
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICacheProvider _cacheProvider;
@@ -30,10 +30,15 @@ namespace Bannerlord.ExpandedTemplate.Integration
         private ForceCivilianEquipmentSetter _forceCivilianEquipmentSetter;
         private MissionSpawnEquipmentPoolSetter _missionSpawnEquipmentPoolSetter;
 
-        public ExpandedTemplateSubModule(ILoggerFactory? loggerFactory = null)
+        public SubModule()
         {
-            _loggerFactory = loggerFactory ?? new ConsoleLoggerFactory();
             _cacheProvider = new CacheCampaignBehaviour();
+            _loggerFactory = new ConsoleLoggerFactory();
+        }
+
+        public SubModule(ILoggerFactory loggerFactory)
+        {
+            _loggerFactory = loggerFactory;
         }
 
         public override void OnBeforeMissionBehaviorInitialize(Mission mission)
@@ -62,10 +67,10 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var npcCharacterRepository = new NpcCharacterRepository(xmlProcessor, _cacheProvider, _loggerFactory);
             var equipmentPoolRoster = new EquipmentSetMapper();
             var equipmentRosterRepository = new EquipmentRosterRepository(xmlProcessor, _cacheProvider, _loggerFactory);
-            var equipmentPoolMapper =
+            var npcCharacterMapper =
                 new NpcCharacterMapper(equipmentRosterRepository, equipmentPoolRoster, _loggerFactory);
             var characterEquipmentPoolRepository =
-                new NpcCharacterEquipmentPoolsProvider(npcCharacterRepository, equipmentPoolMapper);
+                new NpcCharacterEquipmentPoolsProvider(npcCharacterRepository, npcCharacterMapper);
             var civilianEquipmentRepository =
                 new CivilianEquipmentPoolProvider(_loggerFactory, _cacheProvider, characterEquipmentPoolRepository);
             var siegeEquipmentRepository =
@@ -85,14 +90,18 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var random = new Random();
             var equipmentPicker = new EquipmentPoolPoolPicker(random);
 
-            var equipmentMapper =
-                new EquipmentPoolsMapper(MBObjectManager.Instance, _loggerFactory);
+            var equipmentMapper = new EquipmentMapper(MBObjectManager.Instance, _loggerFactory);
+            var equipmentPoolMapper =
+                new EquipmentPoolsMapper(equipmentMapper, _loggerFactory);
             var getEquipmentPool = new GetEquipmentPool(encounterTypeProvider, troopBattleEquipmentProvider,
                 troopSiegeEquipmentProvider, troopCivilianEquipmentProvider, equipmentPicker, _loggerFactory);
+            var getEquipment = new GetEquipment(random);
 
             _forceCivilianEquipmentSetter = new ForceCivilianEquipmentSetter();
             _missionSpawnEquipmentPoolSetter =
-                new MissionSpawnEquipmentPoolSetter(getEquipmentPool, equipmentMapper, _loggerFactory);
+                new MissionSpawnEquipmentPoolSetter(getEquipmentPool, getEquipment, equipmentPoolMapper,
+                    equipmentMapper,
+                    _loggerFactory);
         }
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)

@@ -94,5 +94,6 @@ ipch/
 AssetPackages/
 Shaders/
 
-#DADG
-/config/nlog.config
+
+#Project
+/SubModule.xml

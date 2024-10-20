@@ -28,7 +28,7 @@ This method leverages Bannerlord's ability to load multiple `SubModules` from a 
    <SubModule>
         <Name value="Bannerlord.ExpandedTemplate" />
         <DLLName value="Bannerlord.ExpandedTemplate.Integration.dll" />
-        <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.ExpandedTemplateSubModule" />
+        <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.SubModule" />
         <Tags/>
    </SubModule>
    ```

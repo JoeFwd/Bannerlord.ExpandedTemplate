@@ -13,9 +13,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <HarmonyVersion>2.3.0</HarmonyVersion>
         <IsExternalInitVersion>1.0.3</IsExternalInitVersion>
-        <NLogVersion>5.3.4</NLogVersion>
         <SafeFluentXPathVersion>1.0.0</SafeFluentXPathVersion>
     </PropertyGroup>
 
@@ -27,10 +25,7 @@
 
     <ItemGroup>
         <PackageReference Include="IsExternalInit" Version="$(IsExternalInitVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
-
         <PackageReference Include="SafeFluentXPath.Implementation" Version="$(SafeFluentXPathVersion)" />
-        <PackageReference Include="NLog" Version="$(NLogVersion)"/>
-
         <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj" />
     </ItemGroup>
 

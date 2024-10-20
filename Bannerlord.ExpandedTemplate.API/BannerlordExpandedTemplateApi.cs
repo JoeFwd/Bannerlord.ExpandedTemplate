@@ -5,11 +5,11 @@ namespace Bannerlord.ExpandedTemplate.API;
 
 public class BannerlordExpandedTemplateApi
 {
-    private ExpandedTemplateSubModule _subModule = new ();
+    private SubModule _subModule = new();
 
     public BannerlordExpandedTemplateApi UseLoggerFactory(ILoggerFactory loggerFactory)
     {
-        _subModule = new ExpandedTemplateSubModule(new LoggerFactoryAdapter(loggerFactory));
+        _subModule = new SubModule(new LoggerFactoryAdapter(loggerFactory));
         return this;
     }
 
