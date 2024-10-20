@@ -12,23 +12,29 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
 {
     public class MissionSpawnEquipmentPoolSetter : TaleWorlds.MountAndBlade.MissionLogic
     {
-        private readonly FieldInfo _equipmentRosterField =
+        private readonly FieldInfo? _equipmentRosterField =
             typeof(BasicCharacterObject).GetField("_equipmentRoster", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
         private readonly IGetEquipmentPool _getEquipmentPool;
+        private readonly IGetEquipment _getEquipment;
         private readonly EquipmentPoolsMapper _equipmentPoolsMapper;
+        private readonly EquipmentMapper _equipmentMapper;
+        private readonly ILogger _logger;
 
         private readonly Dictionary<string, MBEquipmentRoster> _nativeEquipmentPools = new();
 
-        public MissionSpawnEquipmentPoolSetter(IGetEquipmentPool getEquipmentPool,
-            EquipmentPoolsMapper equipmentPoolsMapper, ILoggerFactory loggerFactory)
+        public MissionSpawnEquipmentPoolSetter(IGetEquipmentPool getEquipmentPool, IGetEquipment getEquipment,
+            EquipmentPoolsMapper equipmentPoolsMapper, EquipmentMapper equipmentMapper, ILoggerFactory loggerFactory)
         {
             _getEquipmentPool = getEquipmentPool;
+            _getEquipment = getEquipment;
             _equipmentPoolsMapper = equipmentPoolsMapper;
+            _equipmentMapper = equipmentMapper;
+            _logger = loggerFactory.CreateLogger<MissionSpawnEquipmentPoolSetter>();
+            
 
             if (_equipmentRosterField is null || _equipmentRosterField.FieldType != typeof(MBEquipmentRoster))
-                loggerFactory.CreateLogger<MissionSpawnEquipmentPoolSetter>()
-                    .Error(
+                _logger.Error(
                         "BasicCharacterObject's _mbEquipmentRoster field could not be found preventing equipment pool override in friendly missions");
         }
 
@@ -41,13 +47,12 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
 
         public override void OnAgentCreated(Agent agent)
         {
-            if (!CanOverrideEquipment(agent))
-                return;
+            if (_equipmentRosterField is null) return;
+            if (!CanOverrideEquipment(agent)) return;
 
             base.OnAgentCreated(agent);
 
-            var equipmentRoster =
-                (MBEquipmentRoster)_equipmentRosterField.GetValue(agent.Character);
+            var equipmentRoster = (MBEquipmentRoster)_equipmentRosterField.GetValue(agent.Character);
 
             string id = agent.Character.StringId;
             if (agent.Character is CharacterObject characterObject)
@@ -59,14 +64,27 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
             if (equipmentPool.IsEmpty())
                 equipmentPool = _getEquipmentPool.GetTroopEquipmentPool(equipmentRoster.StringId);
 
-            OverrideTroopEquipment(agent,
-                _equipmentPoolsMapper.MapEquipmentPool(equipmentPool, equipmentRoster.StringId));
+
+            if (agent.IsHero)
+            {
+                var equipment = _getEquipment.GetEquipmentFromEquipmentPool(equipmentPool);
+                if (equipment is null)
+                    OverrideHeroEquipment(agent, new Equipment());
+                else
+                    OverrideHeroEquipment(agent,
+                        _equipmentMapper.Map(equipment, equipmentRoster));
+            }
+            else
+            {
+                OverrideTroopEquipment(agent,
+                    _equipmentPoolsMapper.MapEquipmentPool(equipmentPool, equipmentRoster));
+            }
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)
         {
-            if (!CanOverrideEquipment(agent))
-                return;
+            if (_equipmentRosterField is null) return;
+            if (!CanOverrideEquipment(agent)) return;
 
             base.OnAgentBuild(agent, banner);
 
@@ -84,12 +102,26 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
 
         private void OverrideTroopEquipment(IAgent agent, MBEquipmentRoster equipmentPool)
         {
-            if (agent.Character.IsHero)
-                agent.Character.Equipment.FillFrom(equipmentPool.AllEquipments.Count > 0
-                    ? equipmentPool.AllEquipments[0]
-                    : new Equipment());
-            else
-                _equipmentRosterField.SetValue(agent.Character, equipmentPool);
+            _equipmentRosterField?.SetValue(agent.Character, equipmentPool);
+        }
+
+        private void OverrideHeroEquipment(IAgent agent, Equipment? equipment)
+        {
+            if (agent.Character?.Equipment is null)
+            {
+                _logger.Error(
+                    "Expected a hero Agent to have a non-nullable Character field with a non-nullable Equipment field");
+                return;
+            }
+
+            if (equipment is null)
+            {
+                _logger.Error(
+                    $"Could find any equipment for ${agent.Character.StringId}");
+                return;
+            }
+
+            agent.Character.Equipment.FillFrom(equipment);
         }
     }
 }
