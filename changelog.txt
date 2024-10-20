@@ -1,0 +1,11 @@
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Game Versions: v1.2.11
+* feat: pick random equipment from equipment pool for heroes and battle type
+* feat: add submodule for testing purposes
+* doc: add changelog
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Game Versions: v1.2.11
+* Initial release: Allow definition of siege templates and equipment pools via xml
+---------------------------------------------------------------------------------------------------
