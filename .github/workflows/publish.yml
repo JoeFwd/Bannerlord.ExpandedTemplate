@@ -57,12 +57,25 @@ jobs:
   #        NUGET/GPR        #
   ###########################
   publish-on-nuget:
+    name: Publish Module to NuGet
+    runs-on: ubuntu-latest
     needs: [ "build-module" ]
-    uses: BUTR/workflows/.github/workflows/release-nuget.yml@master
-    with:
-      project_path: Bannerlord.ExpandedTemplate.API/Bannerlord.ExpandedTemplate.API.csproj
-    secrets:
-      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Pack
+        run: dotnet pack --configuration Release -o "./packages"
+        shell: pwsh
+
+      - name: Push to NuGet
+        run: dotnet nuget push "./packages/*.nupkg" -k ${{ secrets.NUGET_API_KEY }} -s https://www.nuget.org --skip-duplicate
+        shell: pwsh
 
   ###########################
   #         GITHUB          #

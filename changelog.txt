@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Game Versions: v1.2.11
+* ci: fix unpublished dependency nuget packages
+---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Game Versions: v1.2.11
 * feat: pick random equipment from equipment pool for heroes and battle type
