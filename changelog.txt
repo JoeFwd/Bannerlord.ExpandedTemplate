@@ -1,4 +1,8 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Game Versions: v1.2.11
+* bug: fix crash when custom logger is provided in the api
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Game Versions: v1.2.11
 * ci: fix unpublished dependency nuget packages

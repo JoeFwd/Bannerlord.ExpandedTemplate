@@ -36,7 +36,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
             _loggerFactory = new ConsoleLoggerFactory();
         }
 
-        public SubModule(ILoggerFactory loggerFactory)
+        public SubModule(ILoggerFactory loggerFactory) : this()
         {
             _loggerFactory = loggerFactory;
         }
