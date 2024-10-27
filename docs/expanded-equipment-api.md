@@ -399,6 +399,7 @@ Let's demonstrate how to make a pikeman unit more effective in siege battles. We
 
 <details>
   <summary>Expand this to see the XML pikeman definition</summary>
+
   ```xml
   <NPCCharacter id="vlandian_pikeman">
     ...
@@ -421,6 +422,7 @@ Let's demonstrate how to make a pikeman unit more effective in siege battles. We
       <EquipmentSet id="vlandia_troop_civilian_template_t1" civilian="true"/>
     </Equipments>
   </NPCCharacter>
+
   ```
 </details>
 
@@ -430,6 +432,7 @@ The original definition provides two equipment layouts, both using a pike weapon
 
 <details>
   <summary>Expand this to see the updated XML pikeman definition</summary>
+
   ```xml
   <NPCCharacter id="vlandian_pikeman">
     ...
@@ -476,6 +479,7 @@ The original definition provides two equipment layouts, both using a pike weapon
     </Equipments>
   </NPCCharacter>
   ```
+
 </details>
 
 In the updated XML:
