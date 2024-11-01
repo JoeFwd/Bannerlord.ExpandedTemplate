@@ -14,6 +14,7 @@ using Bannerlord.ExpandedTemplate.Integration.Caching;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Mappers;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Providers;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic;
+using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
 using Bannerlord.ExpandedTemplate.Integration.Xml;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
@@ -27,8 +28,8 @@ namespace Bannerlord.ExpandedTemplate.Integration
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICacheProvider _cacheProvider;
 
-        private ForceCivilianEquipmentSetter _forceCivilianEquipmentSetter;
-        private MissionSpawnEquipmentPoolSetter _missionSpawnEquipmentPoolSetter;
+        private ForceCivilianEquipmentMissionLogic _forceCivilianEquipmentMissionLogic;
+        private EquipmentSetterMissionLogic _equipmentSetterMissionLogic;
 
         public SubModule()
         {
@@ -97,17 +98,22 @@ namespace Bannerlord.ExpandedTemplate.Integration
                 troopSiegeEquipmentProvider, troopCivilianEquipmentProvider, equipmentPicker, _loggerFactory);
             var getEquipment = new GetEquipment(random);
 
-            _forceCivilianEquipmentSetter = new ForceCivilianEquipmentSetter();
-            _missionSpawnEquipmentPoolSetter =
-                new MissionSpawnEquipmentPoolSetter(getEquipmentPool, getEquipment, equipmentPoolMapper,
-                    equipmentMapper,
-                    _loggerFactory);
+            var characterEquipmentRosterReference = new CharacterEquipmentRosterReference(_loggerFactory);
+            var heroEquipmentSetter = new HeroEquipmentSetter(getEquipment, equipmentMapper,
+                characterEquipmentRosterReference, _loggerFactory);
+            var troopEquipmentPoolSetter = new TroopEquipmentPoolSetter(equipmentPoolMapper,
+                characterEquipmentRosterReference);
+
+            _forceCivilianEquipmentMissionLogic = new ForceCivilianEquipmentMissionLogic();
+            _equipmentSetterMissionLogic =
+                new EquipmentSetterMissionLogic(heroEquipmentSetter, troopEquipmentPoolSetter, getEquipmentPool,
+                    characterEquipmentRosterReference);
         }
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)
         {
-            mission.AddMissionBehavior(_forceCivilianEquipmentSetter);
-            mission.AddMissionBehavior(_missionSpawnEquipmentPoolSetter);
+            mission.AddMissionBehavior(_forceCivilianEquipmentMissionLogic);
+            mission.AddMissionBehavior(_equipmentSetterMissionLogic);
         }
         #endregion
 

@@ -4,7 +4,7 @@ using TaleWorlds.MountAndBlade;
 
 namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
 {
-    public class ForceCivilianEquipmentSetter : TaleWorlds.MountAndBlade.MissionLogic
+    public class ForceCivilianEquipmentMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
     {
         public override void OnAgentCreated(Agent agent)
         {
