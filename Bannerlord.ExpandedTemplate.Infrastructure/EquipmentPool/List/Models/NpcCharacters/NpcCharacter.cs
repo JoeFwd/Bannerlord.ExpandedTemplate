@@ -24,17 +24,14 @@ public record NpcCharacter
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        if (GetType() != other.GetType()) return false;
-
-        return Id == other.Id &&
-               Equipments.Equals(other.Equipments);
+        return Equipments.Equals(other.Equipments) && Id == other.Id;
     }
 
     public override int GetHashCode()
     {
-        int hash = 17;
-        hash = hash * 31 + (Id?.GetHashCode() ?? 0);
-        hash = hash * 31 + Equipments.GetHashCode();
-        return hash;
+        unchecked
+        {
+            return (Equipments.GetHashCode() * 397) ^ (Id != null ? Id.GetHashCode() : 0);
+        }
     }
 }

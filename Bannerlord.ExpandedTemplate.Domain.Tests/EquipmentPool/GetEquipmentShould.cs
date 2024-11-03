@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
+﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util;
 using Moq;
@@ -25,8 +24,8 @@ public class GetEquipmentShould
     {
         var equipment = new List<Equipment>
         {
-            new(XDocument.Parse("<Equipment1/>")),
-            new(XDocument.Parse("<Equipment2/>"))
+            new(new List<EquipmentSlot> { new("item", "EquipmentId1") }),
+            new(new List<EquipmentSlot> { new("item", "EquipmentId2") })
         };
         var equipmentPool = new Domain.EquipmentPool.Model.EquipmentPool(equipment, 0);
         _random.Setup(random => random.Next(0, 2)).Returns(0);
@@ -41,8 +40,8 @@ public class GetEquipmentShould
     {
         var equipment = new List<Equipment>
         {
-            new(XDocument.Parse("<Equipment1/>")),
-            new(XDocument.Parse("<Equipment2/>"))
+            new(new List<EquipmentSlot> { new("item", "EquipmentId1") }),
+            new(new List<EquipmentSlot> { new("item", "EquipmentId2") })
         };
         var equipmentPool = new Domain.EquipmentPool.Model.EquipmentPool(equipment, 0);
         _random.Setup(random => random.Next(0, 2)).Returns(1);
