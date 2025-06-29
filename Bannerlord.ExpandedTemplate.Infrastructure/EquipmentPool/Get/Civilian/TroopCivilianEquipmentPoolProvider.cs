@@ -8,13 +8,13 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Civilian;
 public class TroopCivilianEquipmentPoolProvider : ITroopCivilianEquipmentProvider
 {
     private readonly ILogger _logger;
-    private readonly IEquipmentPoolsProvider _equipmentPoolsProvider;
+    private readonly IEquipmentPoolsProvider _civilianEquipmentPoolsProvider;
 
     public TroopCivilianEquipmentPoolProvider(ILoggerFactory loggerFactory,
-        IEquipmentPoolsProvider equipmentPoolsProvider)
+        IEquipmentPoolsProvider civilianEquipmentPoolsProvider)
     {
         _logger = loggerFactory.CreateLogger<TroopCivilianEquipmentPoolProvider>();
-        _equipmentPoolsProvider = equipmentPoolsProvider;
+        _civilianEquipmentPoolsProvider = civilianEquipmentPoolsProvider;
     }
 
     public IList<Domain.EquipmentPool.Model.EquipmentPool> GetCivilianTroopEquipmentPools(string equipmentId)
@@ -25,7 +25,7 @@ public class TroopCivilianEquipmentPoolProvider : ITroopCivilianEquipmentProvide
             return new List<Domain.EquipmentPool.Model.EquipmentPool>();
         }
 
-        var troopEquipmentPools = _equipmentPoolsProvider.GetEquipmentPoolsByCharacterId();
+        var troopEquipmentPools = _civilianEquipmentPoolsProvider.GetEquipmentPoolsByCharacterId();
         if (!troopEquipmentPools.ContainsKey(equipmentId))
         {
             _logger.Warn($"The equipment id {equipmentId} is not in the civilian equipment pools.");
