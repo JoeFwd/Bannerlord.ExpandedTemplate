@@ -32,7 +32,6 @@ namespace Bannerlord.ExpandedTemplate.Integration
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICacheProvider _cacheProvider;
 
-        private ForceCivilianEquipmentMissionLogic _forceCivilianEquipmentMissionLogic;
         private EquipmentSetterMissionLogic _equipmentSetterMissionLogic;
 
         public SubModule()
@@ -122,7 +121,6 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var troopEquipmentPoolSetter = new TroopEquipmentPoolSetter(equipmentPoolMapper,
                 characterEquipmentRosterReference);
 
-            _forceCivilianEquipmentMissionLogic = new ForceCivilianEquipmentMissionLogic();
             _equipmentSetterMissionLogic =
                 new EquipmentSetterMissionLogic(heroEquipmentSetter, troopEquipmentPoolSetter, getEquipmentPool,
                     characterEquipmentRosterReference);
@@ -130,7 +128,6 @@ namespace Bannerlord.ExpandedTemplate.Integration
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)
         {
-            mission.AddMissionBehavior(_forceCivilianEquipmentMissionLogic);
             mission.AddMissionBehavior(_equipmentSetterMissionLogic);
         }
         #endregion
