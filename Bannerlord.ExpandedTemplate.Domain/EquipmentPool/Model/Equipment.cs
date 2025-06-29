@@ -1,43 +1,34 @@
-﻿using System.Xml.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model
 {
-    public class Equipment
+    public record Equipment
     {
-        private readonly XNode _equipmentNode;
-        private readonly XNodeEqualityComparer _xNodeComparer = new ();
+        private readonly IList<EquipmentSlot> _equipmentSlots;
 
-        public Equipment(XNode equipmentNode)
+        public Equipment(IList<EquipmentSlot> equipmentSlots)
         {
-            _equipmentNode = equipmentNode;
+            _equipmentSlots = equipmentSlots;
         }
 
-        public XNode GetEquipmentNode()
+        public IList<EquipmentSlot> GetEquipmentSlots()
         {
-            return _equipmentNode;
+            return _equipmentSlots;
         }
 
-        public override bool Equals(object? obj)
+        public virtual bool Equals(Equipment? other)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Equipment)obj);
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return _equipmentSlots.SequenceEqual(other._equipmentSlots);
         }
 
         public override int GetHashCode()
         {
-            return _xNodeComparer.GetHashCode(_equipmentNode);
-        }
-
-        private bool Equals(Equipment other)
-        {
-            return _equipmentNode.ToString().Equals(other._equipmentNode.ToString());
-        }
-
-        public override string ToString()
-        {
-            return _equipmentNode.ToString();
+            int hash = 17;
+            foreach (var item in _equipmentSlots) hash = hash * 31 + item.GetHashCode();
+            return hash;
         }
     }
 }

@@ -3,7 +3,7 @@
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
 
 [XmlRoot(ElementName = "EquipmentSet")]
-public record EquipmentSet : IPoolFlagGetter
+public record EquipmentSet
 {
     public EquipmentSet()
     {
@@ -11,6 +11,7 @@ public record EquipmentSet : IPoolFlagGetter
 
     public EquipmentSet(EquipmentSet equipmentSet)
     {
+        IsBattle = equipmentSet.IsBattle;
         Id = equipmentSet.Id;
         IsCivilian = equipmentSet.IsCivilian;
         IsSiege = equipmentSet.IsSiege;

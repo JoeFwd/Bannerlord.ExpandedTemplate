@@ -2,12 +2,16 @@
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Battle;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Civilian;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Siege;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Mappers;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.Battle;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.Civilian;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.Siege;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentPool;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Battle;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Civilian;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Pool;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Siege;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
 using Bannerlord.ExpandedTemplate.Infrastructure.Logging;
 using Bannerlord.ExpandedTemplate.Integration.Caching;
@@ -70,22 +74,36 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var equipmentRosterRepository = new EquipmentRosterRepository(xmlProcessor, _cacheProvider, _loggerFactory);
             var npcCharacterMapper =
                 new NpcCharacterMapper(equipmentRosterRepository, equipmentPoolRoster, _loggerFactory);
-            var characterEquipmentPoolRepository =
-                new NpcCharacterEquipmentPoolsProvider(npcCharacterRepository, npcCharacterMapper);
-            var civilianEquipmentRepository =
-                new CivilianEquipmentPoolProvider(_loggerFactory, _cacheProvider, characterEquipmentPoolRepository);
-            var siegeEquipmentRepository =
-                new SiegeEquipmentPoolProvider(_loggerFactory, _cacheProvider, characterEquipmentPoolRepository);
-            var battleEquipmentRepository =
-                new BattleEquipmentPoolProvider(_loggerFactory, _cacheProvider, siegeEquipmentRepository,
-                    civilianEquipmentRepository,
-                    characterEquipmentPoolRepository);
-            var troopBattleEquipmentProvider =
-                new TroopBattleEquipmentProvider(_loggerFactory, battleEquipmentRepository, _cacheProvider);
-            var troopSiegeEquipmentProvider =
-                new TroopSiegeEquipmentProvider(_loggerFactory, siegeEquipmentRepository, _cacheProvider);
-            var troopCivilianEquipmentProvider =
-                new TroopCivilianEquipmentProvider(_loggerFactory, civilianEquipmentRepository, _cacheProvider);
+
+            var npcCharacterWithResolvedEquipmentProvider =
+                new NpcCharacterWithResolvedEquipmentProvider(_cacheProvider, npcCharacterRepository,
+                    npcCharacterMapper, _loggerFactory);
+
+            var siegeEquipmentRostersProvider =
+                new SiegeEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
+            var civilianEquipmentRostersProvider =
+                new CivilianEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
+            var battleEquipmentRosterProvider =
+                new BattleEquipmentRosterProvider(_loggerFactory, _cacheProvider, siegeEquipmentRostersProvider,
+                    civilianEquipmentRostersProvider, npcCharacterWithResolvedEquipmentProvider);
+            var poolEquipmentRostersProvider =
+                new PoolEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
+
+            var equipmentRosterMapper = new EquipmentRosterMapper();
+            var battleEquipmentPoolsProvider = new EquipmentPoolsProvider(battleEquipmentRosterProvider,
+                poolEquipmentRostersProvider, equipmentRosterMapper, _cacheProvider);
+            var siegeEquipmentPoolsProvider = new EquipmentPoolsProvider(siegeEquipmentRostersProvider,
+                poolEquipmentRostersProvider, equipmentRosterMapper, _cacheProvider);
+            var civilianEquipmentPoolsProvider = new EquipmentPoolsProvider(civilianEquipmentRostersProvider,
+                poolEquipmentRostersProvider, equipmentRosterMapper, _cacheProvider);
+
+            var troopBattleEquipmentPoolProvider = new TroopBattleEquipmentPoolProvider(_loggerFactory,
+                battleEquipmentPoolsProvider);
+            var troopSiegeEquipmentPoolProvider = new TroopSiegeEquipmentPoolProvider(_loggerFactory,
+                siegeEquipmentPoolsProvider);
+            var troopCivilianEquipmentPoolProvider = new TroopCivilianEquipmentPoolProvider(_loggerFactory,
+                civilianEquipmentPoolsProvider);
+            
             var encounterTypeProvider = new EncounterTypeProvider();
 
             var random = new Random();
@@ -94,8 +112,8 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var equipmentMapper = new EquipmentMapper(MBObjectManager.Instance, _loggerFactory);
             var equipmentPoolMapper =
                 new EquipmentPoolsMapper(equipmentMapper, _loggerFactory);
-            var getEquipmentPool = new GetEquipmentPool(encounterTypeProvider, troopBattleEquipmentProvider,
-                troopSiegeEquipmentProvider, troopCivilianEquipmentProvider, equipmentPicker, _loggerFactory);
+            var getEquipmentPool = new GetEquipmentPool(encounterTypeProvider, troopBattleEquipmentPoolProvider,
+                troopSiegeEquipmentPoolProvider, troopCivilianEquipmentPoolProvider, equipmentPicker, _loggerFactory);
             var getEquipment = new GetEquipment(random);
 
             var characterEquipmentRosterReference = new CharacterEquipmentRosterReference(_loggerFactory);

@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
+﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Port;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util;
@@ -157,6 +156,6 @@ public class GetEquipmentPoolShould
 
     private static Equipment CreateEquipmentNode()
     {
-        return new Equipment(XDocument.Parse("<EquipmentLoadout/>").Root!);
+        return new Equipment(new List<EquipmentSlot> { new("item", "EquipmentId2") });
     }
 }

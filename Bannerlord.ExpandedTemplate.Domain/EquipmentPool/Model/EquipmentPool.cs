@@ -29,9 +29,9 @@ namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model
             return _equipment.Count == 0;
         }
 
-        private bool Equals(EquipmentPool other)
+        protected bool Equals(EquipmentPool other)
         {
-            return _equipment.SequenceEqual(other._equipment) && _poolId == other._poolId;
+            return _poolId == other._poolId && _equipment.SequenceEqual(other._equipment);
         }
 
         public override bool Equals(object? obj)
@@ -44,7 +44,10 @@ namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model
 
         public override int GetHashCode()
         {
-            return _equipment.GetHashCode() ^ _poolId.GetHashCode();
+            var hashCode = 17;
+            hashCode = (hashCode * 397) ^ _poolId.GetHashCode();
+            foreach (var equipment in _equipment) hashCode = hashCode * 31 + equipment.GetHashCode();
+            return hashCode;
         }
     }
 }

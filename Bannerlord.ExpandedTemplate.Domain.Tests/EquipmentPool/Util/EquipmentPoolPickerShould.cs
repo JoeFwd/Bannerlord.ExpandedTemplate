@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
+﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util;
 using Moq;
 using NUnit.Framework;
@@ -106,7 +105,6 @@ public class EquipmentPoolPickerShould
 
     private Equipment CreateEquipmentNode(string id)
     {
-        XNode node = XDocument.Parse($"<EquipmentLoadout><HeroId>{id}</HeroId></EquipmentLoadout>").Root!;
-        return new Equipment(node);
+        return new Equipment(new List<EquipmentSlot> { new("item", id) });
     }
 }

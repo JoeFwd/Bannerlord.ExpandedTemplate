@@ -1,5 +1,4 @@
-﻿using System.Xml.Linq;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
+﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using NUnit.Framework;
 
 namespace Bannerlord.ExpandedTemplate.Domain.Tests.EquipmentPool.Model;
@@ -72,7 +71,6 @@ public class EquipmentPoolShould
 
     private Equipment CreateEquipment(string id)
     {
-        return new Equipment(XDocument
-            .Parse($"<EquipmentRoster id=\"EquipmentLoadout{id}\"/>").Root!);
+        return new Equipment(new List<EquipmentSlot> { new("item", id) });
     }
 }

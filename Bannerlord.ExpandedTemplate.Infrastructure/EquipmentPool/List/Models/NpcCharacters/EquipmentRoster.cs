@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
 
 [XmlRoot(ElementName = "EquipmentRoster")]
-public record EquipmentRoster : IPoolFlagGetter
+public record EquipmentRoster
 {
     public EquipmentRoster()
     {
@@ -38,21 +38,24 @@ public record EquipmentRoster : IPoolFlagGetter
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        if (GetType() != other.GetType()) return false;
-
-        return IsCivilian == other.IsCivilian &&
-               IsSiege == other.IsSiege &&
-               Pool == other.Pool &&
-               Equipment.SequenceEqual(other.Equipment);
+        return Equipment.SequenceEqual(other.Equipment) && IsBattle == other.IsBattle &&
+               IsCivilian == other.IsCivilian &&
+               IsSiege == other.IsSiege && Pool == other.Pool;
     }
 
     public override int GetHashCode()
     {
-        int hash = 17;
-        foreach (var equipment in Equipment) hash = hash * 31 + equipment.GetHashCode();
-        hash = hash * 31 + IsCivilian?.GetHashCode() ?? 0;
-        hash = hash * 31 + IsSiege?.GetHashCode() ?? 0;
-        hash = hash * 31 + Pool?.GetHashCode() ?? 0;
-        return hash;
+        unchecked
+        {
+            var hashCode = 17;
+            hashCode = (hashCode * 397) ^ (IsBattle != null ? IsBattle.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (IsCivilian != null ? IsCivilian.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (IsSiege != null ? IsSiege.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (Pool != null ? Pool.GetHashCode() : 0);
+
+            foreach (var equipment in Equipment) hashCode = hashCode * 31 + equipment.GetHashCode();
+
+            return hashCode;
+        }
     }
 }
