@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
+using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
 using SandBox.Missions.MissionLogics;
 using TaleWorlds.CampaignSystem;
@@ -10,6 +11,7 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic
 
 public class EquipmentSetterMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
 {
+    private readonly ILogger _logger;
     private readonly HeroEquipmentSetter _heroEquipmentSetter;
     private readonly TroopEquipmentPoolSetter _troopEquipmentPoolSetter;
     private readonly IGetEquipmentPool _getEquipmentPool;
@@ -20,12 +22,13 @@ public class EquipmentSetterMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
 
     public EquipmentSetterMissionLogic(HeroEquipmentSetter heroEquipmentSetter,
         TroopEquipmentPoolSetter troopEquipmentPoolSetter, IGetEquipmentPool getEquipmentPool,
-        CharacterEquipmentRosterReference characterEquipmentRosterReference)
+        CharacterEquipmentRosterReference characterEquipmentRosterReference, ILoggerFactory loggerFactory)
     {
         _heroEquipmentSetter = heroEquipmentSetter;
         _troopEquipmentPoolSetter = troopEquipmentPoolSetter;
         _getEquipmentPool = getEquipmentPool;
         _characterEquipmentRosterReference = characterEquipmentRosterReference;
+        _logger = loggerFactory.CreateLogger<EquipmentSetterMissionLogic>();
     }
 
     public override void OnBehaviorInitialize()
@@ -73,10 +76,18 @@ public class EquipmentSetterMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
         base.OnAgentBuild(agent, banner);
 
         if (agent.IsHero)
+        {
             _heroEquipmentSetter.SetEquipment(agent, _nativeHeroEquipment[agent.Character.StringId]);
+        }
         else
+        {
             _troopEquipmentPoolSetter.SetEquipmentPool(agent,
                 _nativeTroopEquipmentRosters[agent.Character.StringId]);
+        }
+
+        if (agent.SpawnEquipment.IsEmpty())
+            _logger.Warn(
+                $"Troop '{agent.Character.Name.Value}' with id '{agent.Character.StringId}' spawned with no equipment.");
     }
 
     private static bool CanOverrideEquipment(IAgent agent)
