@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.EquipmentRosters;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
 using Equipment = Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters.Equipment;
 using EquipmentRoster = Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters.EquipmentRoster;
-using EquipmentSet = Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters.EquipmentSet;
+using NpcEquipmentSet = Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters.EquipmentSet;
+using RosterEquipmentSet =
+    Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.EquipmentRosters.EquipmentSet;
 
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Mappers;
 
@@ -17,8 +18,10 @@ public class NpcCharacterMapper : INpcCharacterMapper
     private readonly IEquipmentSetMapper _equipmentSetMapper;
     private readonly ILogger _logger;
 
-    public NpcCharacterMapper(IEquipmentRosterRepository equipmentRosterRepository,
-        IEquipmentSetMapper equipmentSetMapper, ILoggerFactory loggerFactory)
+    public NpcCharacterMapper(
+        IEquipmentRosterRepository equipmentRosterRepository,
+        IEquipmentSetMapper equipmentSetMapper,
+        ILoggerFactory loggerFactory)
     {
         _equipmentRosterRepository = equipmentRosterRepository;
         _equipmentSetMapper = equipmentSetMapper;
@@ -27,77 +30,76 @@ public class NpcCharacterMapper : INpcCharacterMapper
 
     public IList<EquipmentRoster> MapToEquipmentRosters(NpcCharacter npcCharacter)
     {
-        IList<EquipmentRoster> equipmentRosters = new List<EquipmentRoster>();
-        EquipmentRosters allEquipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
+        var allEquipmentRosters = _equipmentRosterRepository.GetEquipmentRosters().EquipmentRoster;
+        var equipmentRosters = new List<EquipmentRoster>();
 
-        foreach (EquipmentSet characterEquipmentSet in npcCharacter.Equipments.EquipmentSet)
+        foreach (var characterSet in npcCharacter.Equipments.EquipmentSet)
         {
-            Models.EquipmentRosters.EquipmentRoster equipmentRoster = allEquipmentRosters.EquipmentRoster
-                .Find(equipmentRoster => equipmentRoster?.Id?.Equals(characterEquipmentSet.Id) ?? false);
+            var matchingRoster = allEquipmentRosters
+                .FirstOrDefault(equipmentRoster => equipmentRoster?.Id == characterSet.Id);
 
-            if (equipmentRoster == null)
-                _logger.Warn(
-                    $"EquipmentSet with id {characterEquipmentSet.Id} not found for character {npcCharacter.Id}");
-            else
-                equipmentRoster.EquipmentSet
-                    .Where(equipmentSet =>
-                        AreAllStringsEqual(equipmentSet.IsCivilian, characterEquipmentSet.IsCivilian,
-                            bool.TrueString) ||
-                        AreAllStringsEqual(equipmentSet.IsSiege, characterEquipmentSet.IsSiege, bool.TrueString) ||
-                        (AreAllStringsEqual(characterEquipmentSet.IsBattle, bool.TrueString) &&
-                         (equipmentSet.IsBattle is null ||
-                          AreAllStringsEqual(equipmentSet.IsBattle, bool.TrueString))) ||
-                        (AreAllFlagsFalse(equipmentSet.IsCivilian, equipmentSet.IsSiege) &&
-                         AreAllFlagsFalse(characterEquipmentSet.IsCivilian, characterEquipmentSet.IsSiege)))
-                    .Select(_equipmentSetMapper.MapToEquipmentRoster)
-                    .ToList()
-                    .ForEach(equipmentRosters.Add);
+            if (matchingRoster == null)
+            {
+                _logger.Warn($"EquipmentSet with id {characterSet.Id} not found for character {npcCharacter.Id}");
+                continue;
+            }
+
+            var mappedRosters = matchingRoster.EquipmentSet
+                .Where(set => IsMatchingSet(set, characterSet))
+                .Select(_equipmentSetMapper.MapToEquipmentRoster);
+
+            equipmentRosters.AddRange(mappedRosters);
         }
 
-        IDictionary<string, Equipment> equipmentOverride = npcCharacter.Equipments?.Equipment?
-                                                               .Where(equipment => equipment.Slot != null)
-                                                               .ToDictionary(
-                                                                   equipment => equipment.Slot ?? string.Empty,
-                                                                   equipment => equipment)
-                                                           ?? new Dictionary<string, Equipment>();
+        var equipmentOverride = npcCharacter.Equipments.Equipment
+            .Where(e => !string.IsNullOrWhiteSpace(e.Slot))
+            .ToDictionary(equipment => equipment.Slot!, equipment => equipment);
 
-        equipmentRosters = npcCharacter.Equipments?.EquipmentRoster?
+        return npcCharacter.Equipments.EquipmentRoster
+            .Where(equipmentRoster => equipmentRoster.Equipment.Count > 0)
             .Concat(equipmentRosters)
-            .Select(equipmentRoster => equipmentRoster with
+            .Select(roster => roster with
             {
-                Equipment = OverrideEquipment(equipmentRoster.Equipment, equipmentOverride)
-            }).ToList() ?? new List<EquipmentRoster>();
-
-        return equipmentRosters;
+                Equipment = OverrideEquipment(roster.Equipment, equipmentOverride)
+            })
+            .ToList();
     }
 
-    private List<Equipment> OverrideEquipment(List<Equipment> originalEquipment,
-        IDictionary<string, Equipment> equipmentOverride)
+    private List<Equipment> OverrideEquipment(List<Equipment> original, IDictionary<string, Equipment> overrides)
     {
-        List<Equipment> overriddenEquipment = originalEquipment.Select(equipment => new Equipment
-        {
-            Id = equipmentOverride.ContainsKey(equipment.Slot)
-                ? equipmentOverride[equipment.Slot].Id
-                : equipment.Id,
-            Slot = equipment.Slot
-        }).ToList();
+        var result = original
+            .Select(e => new Equipment
+            {
+                Id = overrides.TryGetValue(e.Slot, out var overrideEq) ? overrideEq.Id : e.Id,
+                Slot = e.Slot
+            }).ToList();
 
-        equipmentOverride.Values
-            .Where(overrideItem => overriddenEquipment.TrueForAll(e => e.Slot != overrideItem.Slot))
-            .ToList()
-            .ForEach(overriddenEquipment.Add);
+        result.AddRange(overrides.Values
+            .Where(o => result.All(e => e.Slot != o.Slot)));
 
-        return overriddenEquipment;
+        return result;
     }
 
-    private static bool AreAllStringsEqual(params string?[] strings)
+    private static bool IsMatchingSet(RosterEquipmentSet set, NpcEquipmentSet characterSet)
     {
-        return strings.All(str =>
-            str is not null && str.Equals(strings[0], StringComparison.OrdinalIgnoreCase));
+        bool allFlagsFalseOnSet = AllFalse(set.IsCivilian, set.IsSiege, set.IsBattle);
+        bool allFlagsFalseOnCharacter = AllFalse(characterSet.IsCivilian, characterSet.IsSiege, characterSet.IsBattle);
+
+        return MatchesFlag(characterSet.IsCivilian, set.IsCivilian) ||
+               MatchesFlag(characterSet.IsSiege, set.IsSiege) ||
+               MatchesFlag(characterSet.IsBattle, set.IsBattle) ||
+               (allFlagsFalseOnSet && allFlagsFalseOnCharacter);
     }
 
-    private static bool AreAllFlagsFalse(params string?[] flags)
+
+    private static bool AllFalse(params string?[] flags)
     {
         return flags.All(flag => !bool.TrueString.Equals(flag, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static bool MatchesFlag(string? characterFlag, string? setFlag)
+    {
+        return bool.TrueString.Equals(characterFlag, StringComparison.OrdinalIgnoreCase) &&
+               (setFlag == null || bool.TrueString.Equals(setFlag, StringComparison.OrdinalIgnoreCase));
     }
 }
