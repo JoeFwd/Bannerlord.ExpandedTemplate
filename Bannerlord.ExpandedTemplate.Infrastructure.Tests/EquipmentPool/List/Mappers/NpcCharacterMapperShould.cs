@@ -571,4 +571,59 @@ public class NpcCharacterMapperShould
             }
         }));
     }
+
+    [Test]
+    public void RemovesEmptyEquipmentRoster()
+    {
+        NpcCharacter npcCharacter = new NpcCharacter
+        {
+            Id = "npc1",
+            Equipments = new Equipments
+            {
+                EquipmentRoster = new List<EquipmentRoster>
+                {
+                    new()
+                }
+            }
+        };
+        _equipmentRosterRepository.Setup(repo => repo.GetEquipmentRosters()).Returns(new EquipmentRosters
+        {
+            EquipmentRoster = new List<Infrastructure.EquipmentPool.List.Models.EquipmentRosters.EquipmentRoster>()
+        });
+
+        IList<EquipmentRoster> equipmentPools = _npcCharacterMapper.MapToEquipmentRosters(npcCharacter);
+
+        Assert.IsEmpty(equipmentPools);
+    }
+
+    [Test]
+    public void RemovesEmptyEquipmentRoster_FromReferencedEquipmentRosters()
+    {
+        NpcCharacter npcCharacter = new NpcCharacter
+        {
+            Id = "npc1",
+            Equipments = new Equipments
+            {
+                EquipmentSet = new List<EquipmentSet>
+                {
+                    new() { Id = "equipmentSet1" }
+                }
+            }
+        };
+        _equipmentRosterRepository.Setup(repo => repo.GetEquipmentRosters()).Returns(new EquipmentRosters
+        {
+            EquipmentRoster = new List<Infrastructure.EquipmentPool.List.Models.EquipmentRosters.EquipmentRoster>
+            {
+                new()
+                {
+                    Id = "equipmentSet1",
+                    EquipmentSet = new List<Infrastructure.EquipmentPool.List.Models.EquipmentRosters.EquipmentSet>()
+                }
+            }
+        });
+
+        IList<EquipmentRoster> equipmentPools = _npcCharacterMapper.MapToEquipmentRosters(npcCharacter);
+
+        Assert.IsEmpty(equipmentPools);
+    }
 }
