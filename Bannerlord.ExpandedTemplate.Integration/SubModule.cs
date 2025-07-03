@@ -122,8 +122,9 @@ namespace Bannerlord.ExpandedTemplate.Integration
                 characterEquipmentRosterReference);
 
             _equipmentSetterMissionLogic =
-                new EquipmentSetterMissionLogic(heroEquipmentSetter, troopEquipmentPoolSetter, getEquipmentPool,
-                    characterEquipmentRosterReference);
+                new EquipmentSetterMissionLogic(heroEquipmentSetter, troopEquipmentPoolSetter,
+                    getEquipmentPool,
+                    characterEquipmentRosterReference, _loggerFactory);
         }
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)

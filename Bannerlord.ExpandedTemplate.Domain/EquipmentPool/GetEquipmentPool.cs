@@ -52,6 +52,8 @@ namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool
                 _logger.Warn(
                     $"No equipment found for troop '{troopId}' in {_encounterTypeProvider.GetEncounterType()} encounter.");
 
+            _logger.Debug($"Troop '{troopId}' has {equipmentPools.Count} equipment pool(s)");
+
             return equipmentPools;
         }
     }
