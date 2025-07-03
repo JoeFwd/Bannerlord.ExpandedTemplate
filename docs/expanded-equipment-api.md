@@ -229,7 +229,7 @@ So now, we have respectively added `pool="1"` and ``pool="2"`` to the first and 
 
 Let's see what the result is in game:
 
-![2_groups](https://github.com/DellarteDellaGuerraTeam/DellarteDellaGuerraMap/assets/32904771/582536b6-7196-4f33-933b-8d30f2be2d91)
+![2_groups](https://github.com/user-attachments/assets/b5fc4b3e-412b-4634-ab4d-74eff5d94239)
 
 As you can see, the `Levy Footman` troops have two distinct equipment loadouts.
 
@@ -295,7 +295,7 @@ So, we changed the pool of the second `EquipmentRoster` node to pool `1` and add
 
 Let's see what the result is in game:
 
-![default_and_2_eq_pool1](https://github.com/DellarteDellaGuerraTeam/DellarteDellaGuerraMap/assets/32904771/fd3ace8a-e144-4586-96dd-f450392262c4)
+![default_and_2_eq_pool1](https://github.com/user-attachments/assets/e7b5cfec-d068-4396-bbfa-0b9c2e556027)
 
 As you can see, the `Levy Footman` troops which had the two unique equipment loadouts now share the items of both layouts.
 
