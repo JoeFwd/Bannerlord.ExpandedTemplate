@@ -32,20 +32,26 @@ namespace Bannerlord.ExpandedTemplate.Integration
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICachingProvider _cachingProvider;
 
-        private EquipmentSetterMissionLogic _equipmentSetterMissionLogic;
         private EquipmentPoolsProvider _civilianEquipmentPoolsProvider;
         private EquipmentPoolsProvider _siegeEquipmentPoolsProvider;
         private EquipmentPoolsProvider _battleEquipmentPoolsProvider;
+
+        private EquipmentSetterMissionLogic? _equipmentSetterMissionLogic;
 
         public SubModule()
         {
             _cachingProvider = new InMemoryCacheProvider();
             _loggerFactory = new ConsoleLoggerFactory();
+            
+            InstantiateEquipmentPoolProviders();
         }
 
         public SubModule(ILoggerFactory loggerFactory) : this()
         {
             _loggerFactory = loggerFactory;
+
+            // Override built dependencies with default logger, everything would be cleaner with a real DI container though
+            InstantiateEquipmentPoolProviders();
         }
 
         public override void OnBeforeMissionBehaviorInitialize(Mission mission)
@@ -58,16 +64,12 @@ namespace Bannerlord.ExpandedTemplate.Integration
         protected override void InitializeGameStarter(Game game, IGameStarter starterObject)
         {
             if (game.GameType is not Campaign || starterObject is not CampaignGameStarter campaignGameStarter) return;
-
-            HandleEquipmentSpawnDependencies();
-
-            campaignGameStarter.AddBehavior(new OnCampaignLoadEquipmentPoolCacher(_cachingProvider as ICacheInvalidator,
+            
+            campaignGameStarter.AddBehavior(new CampaignLoadEquipmentPoolHandler(_cachingProvider as ICacheInvalidator,
                 _battleEquipmentPoolsProvider, _civilianEquipmentPoolsProvider, _siegeEquipmentPoolsProvider));
         }
 
-        #region GetEquipmentSpawn
-
-        private void HandleEquipmentSpawnDependencies()
+        private void InstantiateEquipmentPoolProviders()
         {
             IXmlProcessor xmlProcessor = new MergedModulesXmlProcessor(_loggerFactory, _cachingProvider);
             var npcCharacterRepository = new NpcCharacterRepository(xmlProcessor, _cachingProvider, _loggerFactory);
@@ -78,63 +80,63 @@ namespace Bannerlord.ExpandedTemplate.Integration
                 new NpcCharacterMapper(equipmentRosterRepository, equipmentPoolRoster, _loggerFactory);
 
             var npcCharacterWithResolvedEquipmentProvider =
-                new NpcCharacterWithResolvedEquipmentProvider(npcCharacterRepository,
-                    npcCharacterMapper, _loggerFactory);
+                new NpcCharacterWithResolvedEquipmentProvider(npcCharacterRepository, npcCharacterMapper,
+                    _loggerFactory);
 
             var siegeEquipmentRostersProvider =
                 new SiegeEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
             var civilianEquipmentRostersProvider =
                 new CivilianEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
-            var battleEquipmentRosterProvider =
-                new BattleEquipmentRosterProvider(siegeEquipmentRostersProvider,
-                    civilianEquipmentRostersProvider, npcCharacterWithResolvedEquipmentProvider);
+            var battleEquipmentRosterProvider = new BattleEquipmentRosterProvider(siegeEquipmentRostersProvider,
+                civilianEquipmentRostersProvider, npcCharacterWithResolvedEquipmentProvider);
             var poolEquipmentRostersProvider =
                 new PoolEquipmentRosterProvider(npcCharacterWithResolvedEquipmentProvider);
 
             var equipmentRosterMapper = new EquipmentRosterMapper();
+
             _battleEquipmentPoolsProvider = new EquipmentPoolsProvider(battleEquipmentRosterProvider,
                 poolEquipmentRostersProvider, equipmentRosterMapper, _cachingProvider);
             _siegeEquipmentPoolsProvider = new EquipmentPoolsProvider(siegeEquipmentRostersProvider,
                 poolEquipmentRostersProvider, equipmentRosterMapper, _cachingProvider);
             _civilianEquipmentPoolsProvider = new EquipmentPoolsProvider(civilianEquipmentRostersProvider,
                 poolEquipmentRostersProvider, equipmentRosterMapper, _cachingProvider);
+        }
 
-            var troopBattleEquipmentPoolProvider = new TroopBattleEquipmentPoolProvider(_loggerFactory,
-                _battleEquipmentPoolsProvider);
-            var troopSiegeEquipmentPoolProvider = new TroopSiegeEquipmentPoolProvider(_loggerFactory,
-                _siegeEquipmentPoolsProvider);
-            var troopCivilianEquipmentPoolProvider = new TroopCivilianEquipmentPoolProvider(_loggerFactory,
-                _civilianEquipmentPoolsProvider);
-            
+        private EquipmentSetterMissionLogic InstantiateSpawnEquipmentMissionLogic()
+        {
+            var troopBattleEquipmentPoolProvider =
+                new TroopBattleEquipmentPoolProvider(_loggerFactory, _battleEquipmentPoolsProvider);
+            var troopSiegeEquipmentPoolProvider =
+                new TroopSiegeEquipmentPoolProvider(_loggerFactory, _siegeEquipmentPoolsProvider);
+            var troopCivilianEquipmentPoolProvider =
+                new TroopCivilianEquipmentPoolProvider(_loggerFactory, _civilianEquipmentPoolsProvider);
+
             var encounterTypeProvider = new EncounterTypeProvider();
 
             var random = new Random();
             var equipmentPicker = new EquipmentPoolPoolPicker(random);
 
-            var equipmentMapper = new EquipmentMapper(MBObjectManager.Instance, _loggerFactory);
-            var equipmentPoolMapper =
-                new EquipmentPoolsMapper(equipmentMapper, _loggerFactory);
             var getEquipmentPool = new GetEquipmentPool(encounterTypeProvider, troopBattleEquipmentPoolProvider,
                 troopSiegeEquipmentPoolProvider, troopCivilianEquipmentPoolProvider, equipmentPicker, _loggerFactory);
             var getEquipment = new GetEquipment(random);
 
+            var equipmentMapper = new EquipmentMapper(MBObjectManager.Instance, _loggerFactory);
+            var equipmentPoolMapper = new EquipmentPoolsMapper(equipmentMapper, _loggerFactory);
             var characterEquipmentRosterReference = new CharacterEquipmentRosterReference(_loggerFactory);
             var heroEquipmentSetter = new HeroEquipmentSetter(getEquipment, equipmentMapper,
                 characterEquipmentRosterReference, _loggerFactory);
-            var troopEquipmentPoolSetter = new TroopEquipmentPoolSetter(equipmentPoolMapper,
-                characterEquipmentRosterReference);
+            var troopEquipmentPoolSetter =
+                new TroopEquipmentPoolSetter(equipmentPoolMapper, characterEquipmentRosterReference);
 
-            _equipmentSetterMissionLogic =
-                new EquipmentSetterMissionLogic(heroEquipmentSetter, troopEquipmentPoolSetter,
-                    getEquipmentPool,
-                    characterEquipmentRosterReference, _loggerFactory);
+            return new EquipmentSetterMissionLogic(heroEquipmentSetter,
+                troopEquipmentPoolSetter, getEquipmentPool, characterEquipmentRosterReference, _loggerFactory);
         }
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)
         {
+            _equipmentSetterMissionLogic ??= InstantiateSpawnEquipmentMissionLogic();
             mission.AddMissionBehavior(_equipmentSetterMissionLogic);
         }
-        #endregion
 
         public void Inject()
         {

@@ -4,7 +4,7 @@ using TaleWorlds.CampaignSystem;
 
 namespace Bannerlord.ExpandedTemplate.Integration.EquipmentPool;
 
-public class OnCampaignLoadEquipmentPoolCacher(
+public class CampaignLoadEquipmentPoolHandler(
     ICacheInvalidator cacheInvalidator,
     IEquipmentPoolsProvider battleEquipmentPoolsProviders,
     IEquipmentPoolsProvider civilianEquipmentPoolsProviders,
