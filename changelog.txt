@@ -1,4 +1,20 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Game Versions: v1.2.11,v1.2.12
+
+Enhancements:
+* Improved performance by loading equipment pools from XML only once at the start of the game, making reloading a campaign slightly faster (~3 seconds or more depending on configuration).
+* Reduced binary size by removing no longer needed libraries
+* Refactored code as a first step towards fixing equipment detection incompatibilities with RBM, with no immediate effect on users.
+
+Bug Fixes:
+* Fixed an issue where heroes were naked on the campaign map after siege battles.
+* Resolved an issue of arena spectators appearing without clothing.
+* Corrected a bug causing heroes to appear without gear due to an empty equipment roster in the XML.
+
+Improvements:
+* Added more detailed logging for troubleshooting issues with character appearances.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Game Versions: v1.2.11
 * bug: fix crash when custom logger is provided in the api
