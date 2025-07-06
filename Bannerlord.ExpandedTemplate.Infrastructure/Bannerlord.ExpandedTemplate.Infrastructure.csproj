@@ -29,10 +29,4 @@
         <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Reference Include="Bannerlord.ExpandedTemplate.Infrastructure">
-            <HintPath>..\..\DellarteDellaGuerra.Core\bin\Win64_Shipping_Client\Bannerlord.ExpandedTemplate.Infrastructure.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
 </Project>
