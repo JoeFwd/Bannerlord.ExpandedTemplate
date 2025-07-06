@@ -15,7 +15,7 @@ public class EquipmentPoolPickerShould
     public void SetUp()
     {
         _random = new Mock<IRandom>();
-        _equipmentPoolPicker = new EquipmentPoolPoolPicker(_random.Object);
+        _equipmentPoolPicker = new EquipmentPoolPicker(_random.Object);
     }
 
     [Test]

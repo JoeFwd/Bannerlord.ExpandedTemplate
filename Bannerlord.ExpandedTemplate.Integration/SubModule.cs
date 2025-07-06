@@ -114,7 +114,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var encounterTypeProvider = new EncounterTypeProvider();
 
             var random = new Random();
-            var equipmentPicker = new EquipmentPoolPoolPicker(random);
+            var equipmentPicker = new EquipmentPoolPicker(random);
 
             var getEquipmentPool = new GetEquipmentPool(encounterTypeProvider, troopBattleEquipmentPoolProvider,
                 troopSiegeEquipmentPoolProvider, troopCivilianEquipmentPoolProvider, equipmentPicker, _loggerFactory);

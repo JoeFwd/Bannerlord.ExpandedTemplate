@@ -4,11 +4,11 @@ using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 
 namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util
 {
-    public class EquipmentPoolPoolPicker : IEquipmentPoolPicker
+    public class EquipmentPoolPicker : IEquipmentPoolPicker
     {
         private readonly IRandom _random;
 
-        public EquipmentPoolPoolPicker(IRandom random)
+        public EquipmentPoolPicker(IRandom random)
         {
             _random = random;
         }
