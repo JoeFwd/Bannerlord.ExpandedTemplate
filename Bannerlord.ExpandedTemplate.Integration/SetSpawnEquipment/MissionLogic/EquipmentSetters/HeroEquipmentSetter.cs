@@ -1,7 +1,6 @@
 ﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
-using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Mappers;
+using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 using TaleWorlds.Core;
 using Equipment = TaleWorlds.Core.Equipment;
 
@@ -23,7 +22,7 @@ public class HeroEquipmentSetter
         _logger = loggerFactory.CreateLogger<HeroEquipmentSetter>();
     }
 
-    public void SetEquipmentFromEquipmentPool(IAgent agent, EquipmentPool equipmentPool)
+    public void SetEquipmentFromEquipmentPool(IAgent agent, Domain.EquipmentPool.Model.EquipmentPool equipmentPool)
     {
         MBEquipmentRoster? agentEquipmentRoster =
             _characterEquipmentRosterReference.GetEquipmentRoster(agent.Character);

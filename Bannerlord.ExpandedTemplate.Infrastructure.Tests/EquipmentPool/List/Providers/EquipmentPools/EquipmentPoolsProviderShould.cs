@@ -16,7 +16,7 @@ public class EquipmentPoolsProviderShould
     private Mock<IEquipmentRostersProvider> _battleEquipmentRosterProvider;
     private Mock<IPoolEquipmentRosterProvider> _poolEquipmentRosterProvider;
     private Mock<IEquipmentRosterMapper> _equipmentRosterMapper;
-    private Mock<ICacheProvider> _cacheProvider;
+    private Mock<ICachingProvider> _cacheProvider;
     private IEquipmentPoolsProvider _equipmentPoolsProvider;
 
     private const string CachedObjectId = "irrevelant cache id";
@@ -27,7 +27,7 @@ public class EquipmentPoolsProviderShould
         _battleEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>(MockBehavior.Strict);
         _poolEquipmentRosterProvider = new Mock<IPoolEquipmentRosterProvider>(MockBehavior.Strict);
         _equipmentRosterMapper = new Mock<IEquipmentRosterMapper>(MockBehavior.Strict);
-        _cacheProvider = new Mock<ICacheProvider>(MockBehavior.Strict);
+        _cacheProvider = new Mock<ICachingProvider>(MockBehavior.Strict);
 
         _equipmentPoolsProvider = new EquipmentPoolsProvider(_battleEquipmentRosterProvider.Object,
             _poolEquipmentRosterProvider.Object, _equipmentRosterMapper.Object, _cacheProvider.Object);
@@ -131,7 +131,8 @@ public class EquipmentPoolsProviderShould
             .Setup(mapper => mapper.MapToEquipmentPool(CreateEquipmentRoster("Equipment3", "SiegeEquipment7")))
             .Returns(equipmentPool4);
 
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<object>())).Returns(CachedObjectId);
+        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<object>(), CacheDataType.EquipmentPools))
+            .Returns(CachedObjectId);
 
         var battleEquipmentPoolByCharacterId = _equipmentPoolsProvider.GetEquipmentPoolsByCharacterId();
 
@@ -163,13 +164,14 @@ public class EquipmentPoolsProviderShould
     {
         var result = SetupMocks();
 
-        _cacheProvider.Setup(provider => provider.CacheObject(result)).Returns(CachedObjectId);
+        _cacheProvider.Setup(provider => provider.CacheObject(result, CacheDataType.EquipmentPools))
+            .Returns(CachedObjectId);
 
         // expected result to be cached on first call
         _equipmentPoolsProvider.GetEquipmentPoolsByCharacterId();
 
         _cacheProvider.Setup(provider =>
-                provider.GetCachedObject<IDictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>>>(
+                provider.GetObject<IDictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>>>(
                     CachedObjectId))
             .Returns(result);
 
@@ -234,7 +236,7 @@ public class EquipmentPoolsProviderShould
                 mapper.MapToEquipmentPool(CreateEquipmentRoster("SiegeEquipment1", "SiegeEquipment2")))
             .Returns(equipmentPool1);
 
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<object>()))
+        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<object>(), CacheDataType.EquipmentPools))
             .Returns(CachedObjectId);
 
         return new Dictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>>

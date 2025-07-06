@@ -9,7 +9,9 @@ using Bannerlord.ExpandedTemplate.Infrastructure.Exception;
 
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories
 {
-    public class EquipmentRosterRepository(IXmlProcessor xmlProcessor, ICacheProvider cacheProvider,
+    public class EquipmentRosterRepository(
+        IXmlProcessor xmlProcessor,
+        ICachingProvider cachingProvider,
         ILoggerFactory loggerFactory) : IEquipmentRosterRepository
     {
         internal const string EquipmentRostersRootTag = "EquipmentRosters";
@@ -17,14 +19,14 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Reposito
         internal const string IoErrorMessage = "Error while trying to get equipment rosters";
 
         private readonly ILogger _logger = loggerFactory.CreateLogger<IEquipmentRosterRepository>();
-        private string? _onSessionLaunchedCachedObjectId;
+        private string? _cachedObjectId;
 
         public EquipmentRosters GetEquipmentRosters()
         {
-            if (_onSessionLaunchedCachedObjectId is not null)
+            if (_cachedObjectId is not null)
             {
                 EquipmentRosters? cachedNpcCharacters =
-                    cacheProvider.GetCachedObject<EquipmentRosters>(_onSessionLaunchedCachedObjectId);
+                    cachingProvider.GetObject<EquipmentRosters>(_cachedObjectId);
                 if (cachedNpcCharacters is not null) return cachedNpcCharacters;
 
                 _logger.Error("The cached equipment rosters are null.");
@@ -54,8 +56,7 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Reposito
 
         private void CacheNpcCharacters(EquipmentRosters equipmentRosters)
         {
-            _onSessionLaunchedCachedObjectId = cacheProvider.CacheObject(equipmentRosters);
-            cacheProvider.InvalidateCache(_onSessionLaunchedCachedObjectId, CampaignEvent.OnAfterSessionLaunched);
+            _cachedObjectId = cachingProvider.CacheObject(equipmentRosters, CacheDataType.Xml);
         }
     }
 }

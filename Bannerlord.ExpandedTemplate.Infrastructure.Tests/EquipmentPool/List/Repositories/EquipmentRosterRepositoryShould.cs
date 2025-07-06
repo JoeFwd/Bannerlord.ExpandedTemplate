@@ -14,7 +14,7 @@ public class EquipmentRosterRepositoryShould
     private const string CachedObjectId = "irrelevant_cached_object_id"; 
     
     private Mock<IXmlProcessor> _xmlProcessor;
-    private Mock<ICacheProvider> _cacheProvider;
+    private Mock<ICachingProvider> _cacheProvider;
     private Mock<ILoggerFactory> _loggerFactory;
     private IEquipmentRosterRepository _equipmentRosterRepository;
 
@@ -22,7 +22,7 @@ public class EquipmentRosterRepositoryShould
     public void Setup()
     {
         _xmlProcessor = new Mock<IXmlProcessor>(MockBehavior.Strict);
-        _cacheProvider = new Mock<ICacheProvider>(MockBehavior.Strict);
+        _cacheProvider = new Mock<ICachingProvider>(MockBehavior.Strict);
         _loggerFactory = new Mock<ILoggerFactory>(MockBehavior.Strict);
         _loggerFactory.Setup(factory => factory.CreateLogger<IEquipmentRosterRepository>())
             .Returns(new Mock<ILogger>(MockBehavior.Strict).Object);
@@ -49,10 +49,8 @@ public class EquipmentRosterRepositoryShould
 
         _xmlProcessor.Setup(processor => processor.GetXmlNodes(EquipmentRosterRepository.EquipmentRostersRootTag))
             .Returns(XDocument.Parse(xml));
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>()))
+        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>(), CacheDataType.Xml))
             .Returns(CachedObjectId);
-        _cacheProvider.Setup(provider =>
-            provider.InvalidateCache(CachedObjectId, CampaignEvent.OnAfterSessionLaunched));        
 
         EquipmentRosters equipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
 
@@ -102,17 +100,15 @@ public class EquipmentRosterRepositoryShould
 
         _xmlProcessor.Setup(processor => processor.GetXmlNodes(EquipmentRosterRepository.EquipmentRostersRootTag))
             .Returns(XDocument.Parse(xml));
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>()))
+        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>(), CacheDataType.Xml))
             .Returns(CachedObjectId);
-        _cacheProvider.Setup(provider =>
-            provider.InvalidateCache(CachedObjectId, CampaignEvent.OnAfterSessionLaunched));
 
         // First call to populate cache
         var equipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
 
-        _cacheProvider.Verify(provider => provider.CacheObject(equipmentRosters), Times.Once);
+        _cacheProvider.Verify(provider => provider.CacheObject(equipmentRosters, CacheDataType.Xml), Times.Once);
 
-        _cacheProvider.Setup(cache => cache.GetCachedObject<EquipmentRosters>(CachedObjectId))
+        _cacheProvider.Setup(cache => cache.GetObject<EquipmentRosters>(CachedObjectId))
             .Returns(new EquipmentRosters());
 
         EquipmentRosters cachedEquipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();

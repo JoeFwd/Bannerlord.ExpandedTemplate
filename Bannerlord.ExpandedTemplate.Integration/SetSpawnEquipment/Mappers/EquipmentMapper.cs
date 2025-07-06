@@ -5,7 +5,7 @@ using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using TaleWorlds.Core;
 using TaleWorlds.ObjectSystem;
 
-namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Mappers;
+namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 
 public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory loggerFactory)
 {

@@ -1,5 +1,4 @@
-﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
-using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Mappers;
+﻿using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 using TaleWorlds.Core;
 
 namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
@@ -17,7 +16,7 @@ public class TroopEquipmentPoolSetter
         _characterEquipmentRosterReference = characterEquipmentRosterReference;
     }
 
-    public void SetEquipmentPool(IAgent agent, EquipmentPool equipmentPool)
+    public void SetEquipmentPool(IAgent agent, Domain.EquipmentPool.Model.EquipmentPool equipmentPool)
     {
         if (agent?.Character is null) return;
 

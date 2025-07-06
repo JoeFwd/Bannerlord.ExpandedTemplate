@@ -2,7 +2,7 @@
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Port;
 using TaleWorlds.MountAndBlade;
 
-namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Providers
+namespace Bannerlord.ExpandedTemplate.Integration.EquipmentPool.Spi
 {
     public class EncounterTypeProvider : IEncounterTypeProvider
     {

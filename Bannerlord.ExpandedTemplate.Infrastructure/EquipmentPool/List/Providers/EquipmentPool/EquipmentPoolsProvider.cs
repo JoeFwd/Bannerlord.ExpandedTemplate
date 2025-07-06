@@ -13,7 +13,7 @@ public class EquipmentPoolsProvider : IEquipmentPoolsProvider
     private readonly IEquipmentRostersProvider _equipmentRostersProvider;
     private readonly IPoolEquipmentRosterProvider _poolEquipmentRosterProvider;
     private readonly IEquipmentRosterMapper _equipmentRosterMapper;
-    private readonly ICacheProvider _cacheProvider;
+    private readonly ICachingProvider _cachingProvider;
 
     private string? _cacheId;
 
@@ -21,20 +21,20 @@ public class EquipmentPoolsProvider : IEquipmentPoolsProvider
         IEquipmentRostersProvider equipmentRostersProvider,
         IPoolEquipmentRosterProvider poolEquipmentRosterProvider,
         IEquipmentRosterMapper equipmentRosterMapper,
-        ICacheProvider cacheProvider)
+        ICachingProvider cachingProvider)
     {
         _equipmentRostersProvider = equipmentRostersProvider;
         _poolEquipmentRosterProvider = poolEquipmentRosterProvider;
         _equipmentRosterMapper = equipmentRosterMapper;
-        _cacheProvider = cacheProvider;
+        _cachingProvider = cachingProvider;
     }
 
     public IDictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>> GetEquipmentPoolsByCharacterId()
     {
         if (_cacheId is not null)
         {
-            var cachedEquipmentRostersByPoolAndCharacter = _cacheProvider
-                .GetCachedObject<IDictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>>>(_cacheId);
+            var cachedEquipmentRostersByPoolAndCharacter = _cachingProvider
+                .GetObject<IDictionary<string, IList<Domain.EquipmentPool.Model.EquipmentPool>>>(_cacheId);
 
             if (cachedEquipmentRostersByPoolAndCharacter is not null) return cachedEquipmentRostersByPoolAndCharacter;
         }
@@ -47,7 +47,7 @@ public class EquipmentPoolsProvider : IEquipmentPoolsProvider
             pair => MapToEquipmentPools(pair.Key, pair.Value, equipmentRostersByCharacter)
         );
 
-        _cacheId = _cacheProvider.CacheObject(result);
+        _cacheId = _cachingProvider.CacheObject(result, CacheDataType.EquipmentPools);
 
         return result;
     }

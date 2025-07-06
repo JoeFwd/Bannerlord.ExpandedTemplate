@@ -8,23 +8,15 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Provider
 
 public class BattleEquipmentRosterProvider : IEquipmentRostersProvider
 {
-    private readonly ILogger _logger;
-    private readonly ICacheProvider _cacheProvider;
     private readonly INpcCharacterWithResolvedEquipmentProvider _npcCharacterWithResolvedEquipmentProvider;
     private readonly IEquipmentRostersProvider _siegeEquipmentRosterProvider;
     private readonly IEquipmentRostersProvider _civilianEquipmentRosterProvider;
 
-    private string? _onSessionLaunchedCachedObjectId;
-
     public BattleEquipmentRosterProvider(
-        ILoggerFactory loggerFactory,
-        ICacheProvider cacheProvider,
         IEquipmentRostersProvider siegeEquipmentRosterProvider,
         IEquipmentRostersProvider civilianEquipmentRosterProvider,
         INpcCharacterWithResolvedEquipmentProvider npcCharacterWithResolvedEquipmentProvider)
     {
-        _logger = loggerFactory.CreateLogger<BattleEquipmentRosterProvider>();
-        _cacheProvider = cacheProvider;
         _npcCharacterWithResolvedEquipmentProvider = npcCharacterWithResolvedEquipmentProvider;
         _siegeEquipmentRosterProvider = siegeEquipmentRosterProvider;
         _civilianEquipmentRosterProvider = civilianEquipmentRosterProvider;
@@ -32,25 +24,9 @@ public class BattleEquipmentRosterProvider : IEquipmentRostersProvider
 
     public IDictionary<string, IList<EquipmentRoster>> GetEquipmentRostersByCharacter()
     {
-        if (_onSessionLaunchedCachedObjectId is not null)
-        {
-            IDictionary<string, IList<EquipmentRoster>>? cachedNpcCharacters =
-                _cacheProvider
-                    .GetCachedObject<IDictionary<string, IList<EquipmentRoster>>>(
-                        _onSessionLaunchedCachedObjectId);
-            if (cachedNpcCharacters is not null) return cachedNpcCharacters;
-
-            _logger.Error("The cached equipment pools are null.");
-            return new Dictionary<string, IList<EquipmentRoster>>();
-        }
-
         IDictionary<string, IList<EquipmentRoster>> battleEquipmentRostersByCharacter =
             FilterOutNonBattleEquipmentRostersByCharacterId(_npcCharacterWithResolvedEquipmentProvider
                 .GetNpcCharactersWithResolvedEquipmentRoster());
-
-        _onSessionLaunchedCachedObjectId =
-            _cacheProvider.CacheObject(battleEquipmentRostersByCharacter);
-        _cacheProvider.InvalidateCache(_onSessionLaunchedCachedObjectId, CampaignEvent.OnAfterSessionLaunched);
 
         return battleEquipmentRostersByCharacter;
     }

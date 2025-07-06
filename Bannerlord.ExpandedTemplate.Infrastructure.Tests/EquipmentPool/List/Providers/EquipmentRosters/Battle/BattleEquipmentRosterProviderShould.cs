@@ -12,7 +12,7 @@ public class BattleEquipmentRosterProviderShould
 {
     private const string CachedObjectId = "irrelevant_cached_object_id";
 
-    private Mock<ICacheProvider> _cacheProvider;
+    private Mock<ICachingProvider> _cacheProvider;
     private Mock<IEquipmentRostersProvider> _civilianEquipmentRosterProvider;
     private Mock<IEquipmentRostersProvider> _siegeEquipmentRosterProvider;
     private Mock<INpcCharacterWithResolvedEquipmentProvider> _npcCharacterWithResolvedEquipmentProvider;
@@ -26,13 +26,13 @@ public class BattleEquipmentRosterProviderShould
         _civilianEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>();
         _siegeEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>();
         _npcCharacterWithResolvedEquipmentProvider = new Mock<INpcCharacterWithResolvedEquipmentProvider>();
-        _cacheProvider = new Mock<ICacheProvider>();
+        _cacheProvider = new Mock<ICachingProvider>();
         _logger = new Mock<ILogger>();
         _loggerFactory = new Mock<ILoggerFactory>();
         _loggerFactory.Setup(factory => factory.CreateLogger<BattleEquipmentRosterProvider>())
             .Returns(_logger.Object);
 
-        _battleEquipmentRosterProvider = new BattleEquipmentRosterProvider(_loggerFactory.Object, _cacheProvider.Object,
+        _battleEquipmentRosterProvider = new BattleEquipmentRosterProvider(
             _siegeEquipmentRosterProvider.Object, _civilianEquipmentRosterProvider.Object,
             _npcCharacterWithResolvedEquipmentProvider.Object);
     }
@@ -377,37 +377,6 @@ public class BattleEquipmentRosterProviderShould
                     }
                 }
             }));
-    }
-
-    [Test]
-    public void GetCachedEquipmentPools()
-    {
-        var equipmentByCharacterId = new Dictionary<string, IList<EquipmentRoster>>();
-        _npcCharacterWithResolvedEquipmentProvider
-            .Setup(provider => provider.GetNpcCharactersWithResolvedEquipmentRoster()).Returns(equipmentByCharacterId);
-        var civilianEquipmentRosters = new Dictionary<string, IList<EquipmentRoster>>();
-        _civilianEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
-            .Returns(civilianEquipmentRosters);
-        var siegeEquipmentRosters = new Dictionary<string, IList<EquipmentRoster>>();
-        _siegeEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
-            .Returns(siegeEquipmentRosters);
-
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<object>()))
-            .Returns(CachedObjectId);
-        _cacheProvider.Setup(provider =>
-            provider.InvalidateCache(CachedObjectId, CampaignEvent.OnAfterSessionLaunched));
-
-        var equipmentRosterByCharacter = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
-
-        _cacheProvider.Setup(cacheProvider =>
-                cacheProvider.GetCachedObject<IDictionary<string, IList<EquipmentRoster>>>(
-                    CachedObjectId))
-            .Returns(equipmentRosterByCharacter);
-
-        var cachedCharacterBattleEquipment = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
-
-        Assert.That(cachedCharacterBattleEquipment, Is.EqualTo(equipmentRosterByCharacter));
-        _cacheProvider.VerifyAll();
     }
 
     private EquipmentRoster CreateEquipmentRoster(params string[] equipmentIds)

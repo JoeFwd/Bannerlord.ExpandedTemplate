@@ -1,12 +1,11 @@
 ﻿using System.Linq;
 using System.Reflection;
-using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using Equipment = TaleWorlds.Core.Equipment;
 
-namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.EquipmentPools.Mappers;
+namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 
 public class EquipmentPoolsMapper
 {
@@ -30,7 +29,7 @@ public class EquipmentPoolsMapper
     /// <param name="sourceEquipmentPool">The equipment pool to map from.</param>
     /// <param name="equipmentRosterTemplate">A template for mapping the equipment pool.</param>
     /// <returns>An MBEquipmentRoster containing the duplicated loadouts with battle and civilian flag.</returns>
-    public MBEquipmentRoster MapEquipmentPool(EquipmentPool sourceEquipmentPool,
+    public MBEquipmentRoster MapEquipmentPool(Domain.EquipmentPool.Model.EquipmentPool sourceEquipmentPool,
         MBEquipmentRoster equipmentRosterTemplate)
     {
         if (_equipmentsFieldInfo is null) return new MBEquipmentRoster();

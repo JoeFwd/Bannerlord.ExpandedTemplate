@@ -9,7 +9,9 @@ using Bannerlord.ExpandedTemplate.Infrastructure.Exception;
 
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
 
-public class NpcCharacterRepository(IXmlProcessor xmlProcessor, ICacheProvider cacheProvider,
+public class NpcCharacterRepository(
+    IXmlProcessor xmlProcessor,
+    ICachingProvider cachingProvider,
     ILoggerFactory loggerFactory) : INpcCharacterRepository
 {
     internal const string NpcCharacterRootTag = "NPCCharacters";
@@ -17,16 +19,16 @@ public class NpcCharacterRepository(IXmlProcessor xmlProcessor, ICacheProvider c
     internal const string IoErrorMessage = "Error while trying to get npc characters";
 
     private readonly ILogger _logger = loggerFactory.CreateLogger<INpcCharacterRepository>();
-    private string? _onSessionLaunchedCachedObjectId;
+    private string? _cachedObjectId;
 
     public NpcCharacters GetNpcCharacters()
     {
         try
         {
-            if (_onSessionLaunchedCachedObjectId is not null)
+            if (_cachedObjectId is not null)
             {
                 NpcCharacters? cachedNpcCharacters =
-                    cacheProvider.GetCachedObject<NpcCharacters>(_onSessionLaunchedCachedObjectId);
+                    cachingProvider.GetObject<NpcCharacters>(_cachedObjectId);
                 if (cachedNpcCharacters is not null) return cachedNpcCharacters;
 
                 _logger.Error("The cached npc characters are null.");
@@ -54,7 +56,6 @@ public class NpcCharacterRepository(IXmlProcessor xmlProcessor, ICacheProvider c
 
     private void CacheNpcCharacters(NpcCharacters npcCharacters)
     {
-        _onSessionLaunchedCachedObjectId = cacheProvider.CacheObject(npcCharacters);
-        cacheProvider.InvalidateCache(_onSessionLaunchedCachedObjectId, CampaignEvent.OnAfterSessionLaunched);
+        _cachedObjectId = cachingProvider.CacheObject(npcCharacters, CacheDataType.Xml);
     }
 }

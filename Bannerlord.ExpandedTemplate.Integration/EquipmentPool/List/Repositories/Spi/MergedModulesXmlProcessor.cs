@@ -7,33 +7,32 @@ using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
 using TaleWorlds.ObjectSystem;
 
-namespace Bannerlord.ExpandedTemplate.Integration.Xml
+namespace Bannerlord.ExpandedTemplate.Integration.EquipmentPool.List.Repositories.Spi
 {
     public class MergedModulesXmlProcessor : IXmlProcessor
     {
         private readonly ILogger _logger;
-        private readonly ICacheProvider _cacheProvider;
+        private readonly ICachingProvider _cachingProvider;
         private readonly Dictionary<string, string> _cachedXmlDocumentKeys = new();
 
-        public MergedModulesXmlProcessor(ILoggerFactory loggerFactory, ICacheProvider cacheProvider)
+        public MergedModulesXmlProcessor(ILoggerFactory loggerFactory, ICachingProvider cachingProvider)
         {
             _logger = loggerFactory.CreateLogger<MergedModulesXmlProcessor>();
-            _cacheProvider = cacheProvider;
+            _cachingProvider = cachingProvider;
         }
 
         public XNode GetXmlNodes(string rootElementName)
         {
             if (_cachedXmlDocumentKeys.TryGetValue(rootElementName, out var xmlDocumentKey))
             {
-                var cachedXmlDocument = _cacheProvider.GetCachedObject<XDocument>(xmlDocumentKey);
+                var cachedXmlDocument = _cachingProvider.GetObject<XDocument>(xmlDocumentKey);
                 if (cachedXmlDocument is not null) return cachedXmlDocument;
             }
 
             var xmlDocument = GetMergedXmlCharacterNodes(rootElementName);
 
-            _cachedXmlDocumentKeys[rootElementName] = _cacheProvider.CacheObject(xmlDocument);
-            _cacheProvider.InvalidateCache(_cachedXmlDocumentKeys[rootElementName],
-                CampaignEvent.OnAfterSessionLaunched);
+            _cachedXmlDocumentKeys[rootElementName] =
+                _cachingProvider.CacheObject(xmlDocument, CacheDataType.Xml);
 
             return xmlDocument;
         }
@@ -53,7 +52,7 @@ namespace Bannerlord.ExpandedTemplate.Integration.Xml
             }
             catch (IOException e)
             {
-                _logger.Error($"Failed to get merged XML character nodes: {e}");
+                _logger.Error($"Failed to get merged Xml character nodes: {e}");
                 return new XDocument();
             }
         }
