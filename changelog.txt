@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Game Versions: v1.2.11,v1.2.12
+
+Bug Fixes:
+* Fixed a crash occurring during the loading of a battle after reloading a save.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Game Versions: v1.2.11,v1.2.12
 
