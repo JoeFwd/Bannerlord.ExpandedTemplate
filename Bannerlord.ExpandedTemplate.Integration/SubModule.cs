@@ -134,7 +134,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
 
         private void AddEquipmentSpawnMissionBehaviour(Mission mission)
         {
-            _equipmentSetterMissionLogic ??= InstantiateSpawnEquipmentMissionLogic();
+            _equipmentSetterMissionLogic = InstantiateSpawnEquipmentMissionLogic();
             mission.AddMissionBehavior(_equipmentSetterMissionLogic);
         }
 
