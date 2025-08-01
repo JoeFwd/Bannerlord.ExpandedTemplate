@@ -115,6 +115,112 @@ public class NpcRepositoryRepositoryShould
     }
 
     [Test]
+    public void MergeNpcCharacters_IfDefinedMultipleTimes()
+    {
+        string xml =
+            """
+            <NPCCharacters>
+                <NPCCharacter id="irrelevant_character_id_1" culture="irrelevant_culture_id">
+                    <Equipments>
+                        <EquipmentRoster>
+                            <equipment slot="irrelevant_slot_1" id="irrelevant_slot_id_1"/>
+                        </EquipmentRoster>
+                        <EquipmentRoster>
+                            <equipment slot="irrelevant_slot_2" id="irrelevant_slot_id_2"/>
+                        </EquipmentRoster>
+                        <EquipmentSet id="irrelevant_equipment_set_id1" />
+                        <EquipmentSet id="irrelevant_equipment_set_id2" />                
+                    </Equipments>
+                </NPCCharacter>
+                <NPCCharacter id="irrelevant_character_id_1" culture="irrelevant_culture_id">
+                    <Equipments>
+                        <EquipmentRoster>
+                            <equipment slot="irrelevant_slot_2" id="irrelevant_slot_id_2"/>
+                        </EquipmentRoster>
+                        <EquipmentRoster>
+                            <equipment slot="irrelevant_slot_3" id="irrelevant_slot_id_3"/>
+                        </EquipmentRoster>
+                        <EquipmentSet id="irrelevant_equipment_set_id2" />
+                        <EquipmentSet id="irrelevant_equipment_set_id3" />                
+                    </Equipments>
+                </NPCCharacter>
+            </NPCCharacters>
+            """;
+
+        _xmlProcessor.Setup(processor => processor.GetXmlNodes(NpcCharacterRepository.NpcCharacterRootTag))
+            .Returns(XDocument.Parse(xml));
+        _cacheProvider.Setup(cache => cache.CacheObject(It.IsAny<NpcCharacters>(), CacheDataType.Xml))
+            .Returns(CachedObjectId);
+
+        NpcCharacters equipmentRosters = _npcCharacterRepository.GetNpcCharacters();
+
+        Assert.That(equipmentRosters, Is.EqualTo(new NpcCharacters
+        {
+            NpcCharacter = new List<NpcCharacter>
+            {
+                new()
+                {
+                    Id = "irrelevant_character_id_1",
+                    Equipments = new Equipments
+                    {
+                        EquipmentRoster = new List<EquipmentRoster>
+                        {
+                            new()
+                            {
+                                Equipment = new List<Equipment>
+                                {
+                                    new() { Slot = "irrelevant_slot_1", Id = "irrelevant_slot_id_1" }
+                                }
+                            },
+                            new()
+                            {
+                                Equipment = new List<Equipment>
+                                {
+                                    new() { Slot = "irrelevant_slot_2", Id = "irrelevant_slot_id_2" }
+                                }
+                            },
+                            new()
+                            {
+                                Equipment = new List<Equipment>
+                                {
+                                    new() { Slot = "irrelevant_slot_2", Id = "irrelevant_slot_id_2" }
+                                }
+                            },
+                            new()
+                            {
+                                Equipment = new List<Equipment>
+                                {
+                                    new() { Slot = "irrelevant_slot_3", Id = "irrelevant_slot_id_3" }
+                                }
+                            }
+                        },
+                        EquipmentSet = new List<EquipmentSet>
+                        {
+                            new()
+                            {
+                                Id = "irrelevant_equipment_set_id1"
+                            },
+                            new()
+                            {
+                                Id = "irrelevant_equipment_set_id2"
+                            },
+                            new()
+                            {
+                                Id = "irrelevant_equipment_set_id2"
+                            },
+                            new()
+                            {
+                                Id = "irrelevant_equipment_set_id3"
+                            }
+                        }
+                    }
+                }
+            }
+        }));
+    }
+
+    
+    [Test]
     public void GetCachedNpcCharacters()
     {
         string xml = "<NPCCharacters/>";

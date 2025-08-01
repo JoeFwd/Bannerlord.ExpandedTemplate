@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.5
+Game Versions: v1.2.11,v1.2.12
+
+Bug Fixes:
+* Fixed a crash occuring when a NPCCharacter id is defined in two different modules. The equipment of both characters will be merged like in Bannerlord.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.4
 Game Versions: v1.2.11,v1.2.12
 
