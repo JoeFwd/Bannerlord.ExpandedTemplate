@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
@@ -40,6 +41,8 @@ public class NpcCharacterRepository(
             var serialiser = new XmlSerializer(typeof(NpcCharacters));
             NpcCharacters npcCharacters = (NpcCharacters)serialiser.Deserialize(xmlReader);
 
+            npcCharacters = MergeDuplicateCharacters(npcCharacters);
+
             CacheNpcCharacters(npcCharacters);
 
             return npcCharacters;
@@ -52,6 +55,29 @@ public class NpcCharacterRepository(
         {
             throw new TechnicalException(DeserialisationErrorMessage, e.GetBaseException());
         }
+    }
+
+    private NpcCharacters MergeDuplicateCharacters(NpcCharacters npcCharacters)
+    {
+        var characterGroups = npcCharacters.NpcCharacter.GroupBy(c => c.Id);
+
+        var mergedCharacters = characterGroups.Select(group =>
+        {
+            var firstCharacter = group.First();
+            var mergedEquipments = new Equipments
+            {
+                EquipmentRoster = group.SelectMany(c => c.Equipments.EquipmentRoster).ToList(),
+                EquipmentSet = group.SelectMany(c => c.Equipments.EquipmentSet).ToList()
+            };
+
+            return new NpcCharacter
+            {
+                Id = firstCharacter.Id,
+                Equipments = mergedEquipments
+            };
+        }).ToList();
+
+        return new NpcCharacters { NpcCharacter = mergedCharacters };
     }
 
     private void CacheNpcCharacters(NpcCharacters npcCharacters)
