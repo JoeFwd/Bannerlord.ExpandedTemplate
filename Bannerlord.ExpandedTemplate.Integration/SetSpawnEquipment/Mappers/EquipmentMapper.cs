@@ -49,7 +49,7 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
     private Equipment MapEquipment(Domain.EquipmentPool.Model.Equipment equipment)
     {
         return equipment.GetEquipmentSlots()
-            .Aggregate(new Equipment(false), (equipment1, slot) =>
+            .Aggregate(new Equipment(Equipment.EquipmentType.Battle), (equipment1, slot) =>
             {
                 try
                 {

@@ -27,7 +27,7 @@ using TaleWorlds.ObjectSystem;
 
 namespace Bannerlord.ExpandedTemplate.Integration
 {
-    public class SubModule : MBSubModuleBase
+    public class ExpandedTemplateBootstrapper
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICachingProvider _cachingProvider;
@@ -38,7 +38,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
 
         private EquipmentSetterMissionLogic? _equipmentSetterMissionLogic;
 
-        public SubModule()
+        public ExpandedTemplateBootstrapper()
         {
             _cachingProvider = new InMemoryCacheProvider();
             _loggerFactory = new ConsoleLoggerFactory();
@@ -46,7 +46,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
             InstantiateEquipmentPoolProviders();
         }
 
-        public SubModule(ILoggerFactory loggerFactory) : this()
+        public ExpandedTemplateBootstrapper(ILoggerFactory loggerFactory) : this()
         {
             _loggerFactory = loggerFactory;
 
@@ -54,14 +54,12 @@ namespace Bannerlord.ExpandedTemplate.Integration
             InstantiateEquipmentPoolProviders();
         }
 
-        public override void OnBeforeMissionBehaviorInitialize(Mission mission)
+        public void InitializeMission(Mission mission)
         {
-            base.OnBeforeMissionBehaviorInitialize(mission);
-
             AddEquipmentSpawnMissionBehaviour(mission);
         }
 
-        protected override void InitializeGameStarter(Game game, IGameStarter starterObject)
+        public void InitializeCampaign(Game game, IGameStarter starterObject)
         {
             if (game.GameType is not Campaign || starterObject is not CampaignGameStarter campaignGameStarter) return;
             
@@ -136,11 +134,6 @@ namespace Bannerlord.ExpandedTemplate.Integration
         {
             _equipmentSetterMissionLogic = InstantiateSpawnEquipmentMissionLogic();
             mission.AddMissionBehavior(_equipmentSetterMissionLogic);
-        }
-
-        public void Inject()
-        {
-            Module.CurrentModule.SubModules.Add(this);
         }
     }
 }

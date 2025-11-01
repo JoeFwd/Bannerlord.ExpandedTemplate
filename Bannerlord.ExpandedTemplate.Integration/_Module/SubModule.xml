@@ -22,7 +22,7 @@
     <SubModule>
       <Name value="Bannerlord.ExpandedTemplate" />
       <DLLName value="Bannerlord.ExpandedTemplate.Integration.dll" />
-      <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.SubModule" />
+      <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.ExpandedTemplateBootstrapper"/>
       <Tags />
     </SubModule>
   </SubModules>

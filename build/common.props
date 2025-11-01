@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <BuildVersion>1.1.6</BuildVersion>
-    <GameVersion>1.2.12</GameVersion>
+    <GameVersion>1.3.0</GameVersion>
   </PropertyGroup>
 
   <!-- Game Folder(s) -->
