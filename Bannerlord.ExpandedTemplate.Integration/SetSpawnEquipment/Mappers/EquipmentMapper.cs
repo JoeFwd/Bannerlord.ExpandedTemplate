@@ -21,8 +21,9 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
         if (nativeEquipmentLoadout is null)
         {
             _logger.Error(
-                $"Could not find {equipmentLoadout} among native '{bannerlordEquipmentPool.StringId}' equipment roster");
-            return null;
+                $"Could not find an exact equipment roster with '{DisplayNonEmptySlotAndItemIds(equipmentLoadout)}' among " +
+                $"'{bannerlordEquipmentPool.StringId}' equipment rosters. Using given equipment roster.");
+            return equipmentLoadout;
         }
 
         return nativeEquipmentLoadout;
@@ -75,5 +76,19 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
         Match match = Regex.Match(id, pattern);
 
         return match.Success ? match.Groups[2].Value : id;
+    }
+
+    private string DisplayNonEmptySlotAndItemIds(Equipment equipmentLoadout)
+    {
+        var ids = Enumerable.Range((int)EquipmentIndex.WeaponItemBeginSlot, (int)EquipmentIndex.NumEquipmentSetSlots)
+            .Select(i =>
+            {
+                var equipmentSlot = (EquipmentIndex)i;
+                var equipment = equipmentLoadout.GetEquipmentFromSlot(equipmentSlot);
+                if (equipment.IsEmpty) return string.Empty;
+                return $"{Enum.GetName(typeof(EquipmentIndex), equipmentSlot)}: {equipment.Item.StringId}";
+            })
+            .Where(slotAndItemDisplay => !slotAndItemDisplay.IsEmpty());
+        return string.Join(", ", ids);
     }
 }

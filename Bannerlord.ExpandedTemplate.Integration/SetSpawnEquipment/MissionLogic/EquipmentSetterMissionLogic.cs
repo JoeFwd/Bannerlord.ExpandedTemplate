@@ -49,6 +49,8 @@ public class EquipmentSetterMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
 
         base.OnAgentCreated(agent);
 
+        _logger.Debug($"--- START Equipment for Agent {agent.Index} ({agent.Character.StringId}) ---");
+        
         string id = agent.Character.StringId;
         if (agent.Character is CharacterObject characterObject)
             id = characterObject.OriginalCharacter?.StringId ?? id;
@@ -88,6 +90,8 @@ public class EquipmentSetterMissionLogic : TaleWorlds.MountAndBlade.MissionLogic
         if (agent.SpawnEquipment.IsEmpty())
             _logger.Warn(
                 $"Troop '{agent.Character.Name.Value}' with id '{agent.Character.StringId}' spawned with no equipment.");
+
+        _logger.Debug($"--- END Equipment for Agent {agent.Index} ({agent.Character.StringId}) ---");
     }
 
     private static bool CanOverrideEquipment(IAgent agent)

@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.6
+Game Versions: v1.2.12
+
+Enhancements:
+* Added more verbose logs when the system fails to load equipment loadouts  
+---------------------------------------------------------------------------------------------------
 Version: 1.1.5
 Game Versions: v1.2.11,v1.2.12
 
