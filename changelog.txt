@@ -2,6 +2,9 @@
 Version: 1.1.6
 Game Versions: v1.2.12
 
+Bug Fixes:
+* Fixed equipment loadout selection when multiple loadouts for a troop share identical weapons in the same weapon slots.
+
 Enhancements:
 * Added more verbose logs when the system fails to load equipment loadouts  
 ---------------------------------------------------------------------------------------------------

@@ -37,7 +37,7 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
         return bannerlordEquipmentPool.AllEquipments.Find(nativeEquipmentLoadout =>
         {
             for (EquipmentIndex index = EquipmentIndex.WeaponItemBeginSlot;
-                 index < EquipmentIndex.NumAllWeaponSlots;
+                 index < EquipmentIndex.NumEquipmentSetSlots;
                  index++)
                 if (nativeEquipmentLoadout[index].Item != equipment[index].Item)
                     return false;
