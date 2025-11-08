@@ -1,27 +1,20 @@
 ﻿using Bannerlord.ExpandedTemplate.API.Logging;
 using Bannerlord.ExpandedTemplate.Integration;
-using TaleWorlds.Core;
-using TaleWorlds.MountAndBlade;
 
 namespace Bannerlord.ExpandedTemplate.API;
 
 public class BannerlordExpandedTemplateApi
 {
-    private ExpandedTemplateBootstrapper _expandedTemplateBootstrapper = new();
+    private ExpandedTemplateSubModule _expandedTemplateSubModule = new();
 
     public BannerlordExpandedTemplateApi UseLoggerFactory(ILoggerFactory loggerFactory)
     {
-        _expandedTemplateBootstrapper = new ExpandedTemplateBootstrapper(new LoggerFactoryAdapter(loggerFactory));
+        _expandedTemplateSubModule = new ExpandedTemplateSubModule(new LoggerFactoryAdapter(loggerFactory));
         return this;
     }
 
-    public void OnBeforeMissionBehaviorInitialize(Mission mission)
+    public void Bind()
     {
-        _expandedTemplateBootstrapper.InitializeMission(mission);
-    }
-
-    public void InitializeGameStarter(Game game, IGameStarter starterObject)
-    {
-        _expandedTemplateBootstrapper.InitializeCampaign(game, starterObject);
+        _expandedTemplateSubModule.Inject();
     }
 }

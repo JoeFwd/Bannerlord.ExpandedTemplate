@@ -17,6 +17,7 @@ using Bannerlord.ExpandedTemplate.Infrastructure.Logging;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool.List.Repositories.Spi;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool.Spi;
+using Bannerlord.ExpandedTemplate.Integration.Module;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
@@ -24,13 +25,15 @@ using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
+using Random = Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util.Random;
 
 namespace Bannerlord.ExpandedTemplate.Integration
 {
-    public class ExpandedTemplateBootstrapper
+    public class ExpandedTemplateSubModule : MBSubModuleBase
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly ICachingProvider _cachingProvider;
+        private readonly SubModuleInjector _subModuleInjector;
 
         private EquipmentPoolsProvider _civilianEquipmentPoolsProvider;
         private EquipmentPoolsProvider _siegeEquipmentPoolsProvider;
@@ -38,17 +41,19 @@ namespace Bannerlord.ExpandedTemplate.Integration
 
         private EquipmentSetterMissionLogic? _equipmentSetterMissionLogic;
 
-        public ExpandedTemplateBootstrapper()
+        public ExpandedTemplateSubModule()
         {
             _cachingProvider = new InMemoryCacheProvider();
             _loggerFactory = new ConsoleLoggerFactory();
+            _subModuleInjector = new SubModuleInjector(_loggerFactory);
             
             InstantiateEquipmentPoolProviders();
         }
 
-        public ExpandedTemplateBootstrapper(ILoggerFactory loggerFactory) : this()
+        public ExpandedTemplateSubModule(ILoggerFactory loggerFactory) : this()
         {
             _loggerFactory = loggerFactory;
+            _subModuleInjector = new SubModuleInjector(loggerFactory);
 
             // Override built dependencies with default logger, everything would be cleaner with a real DI container though
             InstantiateEquipmentPoolProviders();
@@ -134,6 +139,11 @@ namespace Bannerlord.ExpandedTemplate.Integration
         {
             _equipmentSetterMissionLogic = InstantiateSpawnEquipmentMissionLogic();
             mission.AddMissionBehavior(_equipmentSetterMissionLogic);
+        }
+
+        public void Inject()
+        {
+            _subModuleInjector.Inject();
         }
     }
 }
