@@ -59,9 +59,9 @@ public class SubModuleInjector
     {
         string subModuleXml = $@"
             <SubModule>
-                <Name value=""{GetType().Name}""/>
-                <DLLName value=""{GetType().Namespace}.dll""/>
-                <SubModuleClassType value=""{GetType().FullName}""/>
+                <Name value=""{typeof(ExpandedTemplateSubModule).Name}""/>
+                <DLLName value=""{typeof(ExpandedTemplateSubModule).Namespace}.dll""/>
+                <SubModuleClassType value=""{typeof(ExpandedTemplateSubModule).FullName}""/>
                 <Tags />
             </SubModule>";
         var doc = new XmlDocument();

@@ -59,19 +59,21 @@ namespace Bannerlord.ExpandedTemplate.Integration
             InstantiateEquipmentPoolProviders();
         }
 
-        public void InitializeMission(Mission mission)
+        public override void OnBeforeMissionBehaviorInitialize(Mission mission)
         {
+            base.OnBeforeMissionBehaviorInitialize(mission);
+
             AddEquipmentSpawnMissionBehaviour(mission);
         }
 
-        public void InitializeCampaign(Game game, IGameStarter starterObject)
+        protected override void InitializeGameStarter(Game game, IGameStarter starterObject)
         {
             if (game.GameType is not Campaign || starterObject is not CampaignGameStarter campaignGameStarter) return;
             
             campaignGameStarter.AddBehavior(new CampaignLoadEquipmentPoolHandler(_cachingProvider as ICacheInvalidator,
                 _battleEquipmentPoolsProvider, _civilianEquipmentPoolsProvider, _siegeEquipmentPoolsProvider));
         }
-
+        
         private void InstantiateEquipmentPoolProviders()
         {
             IXmlProcessor xmlProcessor = new MergedModulesXmlProcessor(_loggerFactory, _cachingProvider);
