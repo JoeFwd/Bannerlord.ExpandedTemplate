@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
+using Microsoft.Extensions.DependencyInjection;
 using TaleWorlds.ModuleManager;
 
 namespace Bannerlord.ExpandedTemplate.Integration.Module;
@@ -13,10 +15,12 @@ public class SubModuleInjector
         typeof(List<SubModuleInfo>).GetField("_version", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private readonly ILogger _logger;
+    private readonly IServiceProvider _serviceProvider;
 
-    public SubModuleInjector(ILoggerFactory loggerFactory)
+    public SubModuleInjector(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
     {
         _logger = loggerFactory.CreateLogger<SubModuleInjector>();
+        _serviceProvider = serviceProvider;
     }
 
     public void Inject()
@@ -34,6 +38,12 @@ public class SubModuleInjector
             .Where(tuple =>
                 !currentlyLoadedSubModuleTypeNames.Contains(tuple.subModuleTypeName))
             .Select(tuple => tuple.moduleInfo).FirstOrDefault();
+
+        if (moduleInfoBeingLoaded == null)
+        {
+            _logger.Warn("No module info being loaded was found. Skipping SubModule injection.");
+            return;
+        }
 
         var subModuleInfo = new SubModuleInfo();
         subModuleInfo.LoadFrom(GetSubModuleInfo(), moduleInfoBeingLoaded.FolderPath, false);
@@ -71,10 +81,13 @@ public class SubModuleInjector
 
     private void AddSubModule(ModuleInfo moduleInfo, SubModuleInfo subModuleInfo)
     {
-        int currentVersion = (int)VersionListField.GetValue(moduleInfo.SubModules)!;
+        int currentVersion = (int)(VersionListField?.GetValue(moduleInfo.SubModules) ?? 0);
 
         moduleInfo.SubModules.Add(subModuleInfo);
 
-        VersionListField.SetValue(moduleInfo.SubModules, currentVersion);
+        if (VersionListField != null)
+        {
+            VersionListField.SetValue(moduleInfo.SubModules, currentVersion);
+        }
     }
 }

@@ -62,7 +62,7 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
                 }
                 catch (ArgumentException e)
                 {
-                    _logger.Error($"Could not parse '{slot.SlotId}' as an EquipmentIndex");
+                    _logger.Error($"Could not parse '{slot.SlotId}' as an EquipmentIndex. Error: {e.Message}");
                 }
 
                 return equipment1;
