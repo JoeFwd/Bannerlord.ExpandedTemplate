@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
-using Microsoft.Extensions.DependencyInjection;
 using TaleWorlds.ModuleManager;
 
 namespace Bannerlord.ExpandedTemplate.Integration.Module;
@@ -70,7 +69,7 @@ public class SubModuleInjector
         string subModuleXml = $@"
             <SubModule>
                 <Name value=""{typeof(ExpandedTemplateSubModule).Name}""/>
-                <DLLName value=""{typeof(ExpandedTemplateSubModule).Namespace}.dll""/>
+                <DLLName value=""{Assembly.GetExecutingAssembly().GetName().Name}.dll""/>
                 <SubModuleClassType value=""{typeof(ExpandedTemplateSubModule).FullName}""/>
                 <Tags />
             </SubModule>";
