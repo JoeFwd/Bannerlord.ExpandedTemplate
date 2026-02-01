@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0  
+Game Versions: v1.2.12  
+
+Bug Fixes:
+* Fixed XML node case sensitivity issues for `EquipmentRoster`, `EquipmentSet`, and `Equipment` elements.
+Now a EquipmentRoster will correctly take into account "Equipment" and "equipment" nodes. 
+
+Feat:
+* Use a Harmony patch to override equipment spawning logic instead of relying on mission-related spawn hooks. This helps apply custom equipment logic to equipment defined in code.
+
+In Bannerlord's C# API, this addresses cases where `AgentBuildData` uses `FixedEquipment(true)`, which bypasses the game's spawn equipment logic.  
+For instance, guards spawning in towns (e.g. `guard_vlandia` in Native) rely on an XML template that is modified in code to add a polearm. With this Harmony patch, this module overrides that system so that it **solely** uses the native spawn equipment selection logic.
+
+If a third-party mod dynamically creates equipment templates that do not match the troop's XML data, this module will use the dynamic equipment template without applying any custom logic. (This is still the same behaviour as in previous versions of the module.)
+---------------------------------------------------------------------------------------------------
 Version: 1.1.6
 Game Versions: v1.2.12
 
