@@ -26,6 +26,7 @@
 
     <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj" />
     <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj" />
+    <PackageReference Include="Lib.Harmony" Version="2.4.2"/>
   </ItemGroup>
 
 </Project>

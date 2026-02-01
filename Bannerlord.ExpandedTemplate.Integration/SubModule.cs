@@ -21,6 +21,7 @@ using Bannerlord.ExpandedTemplate.Integration.EquipmentPool.Spi;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
+using HarmonyLib;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -37,7 +38,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
         private EquipmentPoolsProvider _siegeEquipmentPoolsProvider;
         private EquipmentPoolsProvider _battleEquipmentPoolsProvider;
 
-        private EquipmentSetterMissionLogic? _equipmentSetterMissionLogic;
+        private readonly Harmony _harmony = new("Bannerlord.ExpandedTemplate.Harmony");
 
         public SubModule()
         {
@@ -45,6 +46,8 @@ namespace Bannerlord.ExpandedTemplate.Integration
             _loggerFactory = new ConsoleLoggerFactory();
             
             InstantiateEquipmentPoolProviders();
+
+            _harmony.PatchAll();
         }
 
         public SubModule(ILoggerFactory loggerFactory) : this()
@@ -59,7 +62,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
         {
             base.OnBeforeMissionBehaviorInitialize(mission);
 
-            AddEquipmentSpawnMissionBehaviour(mission);
+            InstantiateSpawnMissionLogic();
         }
 
         protected override void InitializeGameStarter(Game game, IGameStarter starterObject)
@@ -104,7 +107,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
                 poolEquipmentRostersProvider, equipmentRosterMapper, _cachingProvider);
         }
 
-        private EquipmentSetterMissionLogic InstantiateSpawnEquipmentMissionLogic()
+        private void InstantiateSpawnMissionLogic()
         {
             var troopBattleEquipmentPoolProvider =
                 new TroopBattleEquipmentPoolProvider(_loggerFactory, _battleEquipmentPoolsProvider);
@@ -125,19 +128,11 @@ namespace Bannerlord.ExpandedTemplate.Integration
             var equipmentMapper = new EquipmentMapper(MBObjectManager.Instance, _loggerFactory);
             var equipmentPoolMapper = new EquipmentPoolsMapper(equipmentMapper, _loggerFactory);
             var characterEquipmentRosterReference = new CharacterEquipmentRosterReference(_loggerFactory);
-            var heroEquipmentSetter = new HeroEquipmentSetter(getEquipment, equipmentMapper,
+            var heroEquipmentGetter = new HeroEquipmentGetter(getEquipment, equipmentMapper,
                 characterEquipmentRosterReference, _loggerFactory);
-            var troopEquipmentPoolSetter =
-                new TroopEquipmentPoolSetter(equipmentPoolMapper, characterEquipmentRosterReference);
 
-            return new EquipmentSetterMissionLogic(heroEquipmentSetter,
-                troopEquipmentPoolSetter, getEquipmentPool, characterEquipmentRosterReference, _loggerFactory);
-        }
-
-        private void AddEquipmentSpawnMissionBehaviour(Mission mission)
-        {
-            _equipmentSetterMissionLogic = InstantiateSpawnEquipmentMissionLogic();
-            mission.AddMissionBehavior(_equipmentSetterMissionLogic);
+            EquipmentSetterPatch.Initialise(heroEquipmentGetter,
+                getEquipmentPool, characterEquipmentRosterReference, equipmentPoolMapper, _loggerFactory);
         }
 
         public void Inject()
