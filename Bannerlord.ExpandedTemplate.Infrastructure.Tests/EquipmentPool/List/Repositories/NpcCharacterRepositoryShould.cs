@@ -230,17 +230,17 @@ public class NpcRepositoryRepositoryShould
         _cacheProvider.Setup(cache => cache.CacheObject(It.IsAny<NpcCharacters>(), CacheDataType.Xml))
             .Returns(CachedObjectId);
 
-        // First call to populate cache
         var equipmentRosters = _npcCharacterRepository.GetNpcCharacters();
 
         _cacheProvider.Verify(provider => provider.CacheObject(equipmentRosters, CacheDataType.Xml), Times.Once);
+        var cachedNpcCharacters = new NpcCharacters { NpcCharacter = new List<NpcCharacter> { new() } };
         _cacheProvider.Setup(cache => cache.GetObject<NpcCharacters>(CachedObjectId))
-            .Returns(new NpcCharacters());
+            .Returns(cachedNpcCharacters);
 
-        NpcCharacters cachedEquipmentRosters = _npcCharacterRepository.GetNpcCharacters();
+        NpcCharacters actualCachedNpcCharacters = _npcCharacterRepository.GetNpcCharacters();
 
         _cacheProvider.VerifyAll();
-        Assert.That(cachedEquipmentRosters, Is.EqualTo(equipmentRosters));
+        Assert.That(actualCachedNpcCharacters, Is.EqualTo(cachedNpcCharacters));
     }
 
     [Test]

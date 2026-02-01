@@ -26,26 +26,10 @@ public class NpcCharacterRepository(
     {
         try
         {
-            if (_cachedObjectId is not null)
-            {
-                NpcCharacters? cachedNpcCharacters =
-                    cachingProvider.GetObject<NpcCharacters>(_cachedObjectId);
-                if (cachedNpcCharacters is not null) return cachedNpcCharacters;
+            var cached = TryGetCachedNpcCharacters();
+            if (cached != null) return cached;
 
-                _logger.Error("The cached npc characters are null.");
-                return new NpcCharacters();
-            }
-                
-            using XmlReader xmlReader = xmlProcessor.GetXmlNodes(NpcCharacterRootTag).CreateReader();
-
-            var serialiser = new XmlSerializer(typeof(NpcCharacters));
-            NpcCharacters npcCharacters = (NpcCharacters)serialiser.Deserialize(xmlReader);
-
-            npcCharacters = MergeDuplicateCharacters(npcCharacters);
-
-            CacheNpcCharacters(npcCharacters);
-
-            return npcCharacters;
+            return LoadNpcCharactersFromXml();
         }
         catch (IOException e)
         {
@@ -83,5 +67,26 @@ public class NpcCharacterRepository(
     private void CacheNpcCharacters(NpcCharacters npcCharacters)
     {
         _cachedObjectId = cachingProvider.CacheObject(npcCharacters, CacheDataType.Xml);
+    }
+
+    private NpcCharacters? TryGetCachedNpcCharacters()
+    {
+        if (_cachedObjectId == null) return null;
+        var cached = cachingProvider.GetObject<NpcCharacters>(_cachedObjectId);
+        if (cached == null)
+        {
+            _logger.Error("The cached npc characters are null.");
+        }
+        return cached;
+    }
+
+    private NpcCharacters LoadNpcCharactersFromXml()
+    {
+        using XmlReader xmlReader = xmlProcessor.GetXmlNodes(NpcCharacterRootTag).CreateReader();
+        var serialiser = new XmlSerializer(typeof(NpcCharacters));
+        var npcCharacters = (NpcCharacters)serialiser.Deserialize(xmlReader);
+        npcCharacters = MergeDuplicateCharacters(npcCharacters);
+        CacheNpcCharacters(npcCharacters);
+        return npcCharacters;
     }
 }
