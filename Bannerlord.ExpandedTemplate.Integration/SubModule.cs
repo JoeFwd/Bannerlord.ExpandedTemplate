@@ -13,6 +13,7 @@ using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.Eq
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Pool;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Siege;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Xml;
 using Bannerlord.ExpandedTemplate.Infrastructure.Logging;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool.List.Repositories.Spi;
@@ -74,8 +75,9 @@ namespace Bannerlord.ExpandedTemplate.Integration
             IXmlProcessor xmlProcessor = new MergedModulesXmlProcessor(_loggerFactory, _cachingProvider);
             var npcCharacterRepository = new NpcCharacterRepository(xmlProcessor, _cachingProvider, _loggerFactory);
             var equipmentPoolRoster = new EquipmentSetMapper();
+            IEquipmentRostersReader equipmentRostersReader = new EquipmentRostersReader(new EquipmentRosterXmlReader());
             var equipmentRosterRepository =
-                new EquipmentRosterRepository(xmlProcessor, _cachingProvider, _loggerFactory);
+                new EquipmentRosterRepository(xmlProcessor, equipmentRostersReader, _cachingProvider, _loggerFactory);
             var npcCharacterMapper =
                 new NpcCharacterMapper(equipmentRosterRepository, equipmentPoolRoster, _loggerFactory);
 
