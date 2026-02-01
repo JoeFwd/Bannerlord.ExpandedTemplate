@@ -9,6 +9,11 @@ for easier debugging and development.
 - **Expanded Equipment API**:
     - Supports siege equipment templates.
     - Allows multiple equipment pools.
+    - Any **civilian** mission now reads only civilian XML equipment templates. Bannerlord previously had inconsistencies such as:
+        - Mercenaries using battle equipment in taverns while other characters use civilian templates in a supposedly "friendly" mission.
+        - Town guards (e.g. `guard_vlandia`) using battle equipment templates during friendly town visits.  
+          Now, all such cases require a civilian tag.
+    - Equipment templates may specify multiple mission types (e.g. `"civilian"=true`, `"battle"=true`), reducing the amount of duplicated equipment XML.
 
 For more details, check out the [Expanded Equipment API Documentation](docs/expanded-equipment-api.md).
 
