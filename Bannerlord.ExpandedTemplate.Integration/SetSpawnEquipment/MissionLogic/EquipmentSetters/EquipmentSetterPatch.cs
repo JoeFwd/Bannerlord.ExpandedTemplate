@@ -1,7 +1,8 @@
+using System.Reflection;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
-using HarmonyLib;
+using Harmony.DependencyInjection.Patches;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -9,15 +10,34 @@ using Equipment = TaleWorlds.Core.Equipment;
 
 namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
 
-[HarmonyPatch(typeof(Mission))]
-[HarmonyPatch("SpawnAgent")]
-public class EquipmentSetterPatch
+public class EquipmentSetterPatch : IPatch
 {
     private static HeroEquipmentGetter _heroEquipmentGetter;
     private static IGetEquipmentPool _getEquipmentPool;
     private static CharacterEquipmentRosterReference _characterEquipmentRosterReference;
     private static EquipmentPoolsMapper _equipmentPoolsMapper;
     private static ILogger _logger;
+
+    public EquipmentSetterPatch(HeroEquipmentGetter heroEquipmentGetter,
+        IGetEquipmentPool getEquipmentPool,
+        CharacterEquipmentRosterReference characterEquipmentRosterReference,
+        EquipmentPoolsMapper equipmentPoolsMapper,
+        ILoggerFactory loggerFactory)
+    {
+        _heroEquipmentGetter = heroEquipmentGetter;
+        _getEquipmentPool = getEquipmentPool;
+        _characterEquipmentRosterReference = characterEquipmentRosterReference;
+        _equipmentPoolsMapper = equipmentPoolsMapper;
+        _logger = loggerFactory.CreateLogger<EquipmentSetterPatch>();
+    }
+
+    public MethodInfo? TargetMethod =>
+        typeof(Mission).GetMethod("SpawnAgent", BindingFlags.Public | BindingFlags.Instance);
+
+    public MethodInfo? PatchMethod =>
+        typeof(EquipmentSetterPatch).GetMethod("Prefix", BindingFlags.Public | BindingFlags.Static);
+
+    public PatchType PatchType => PatchType.Prefix;
 
     public static bool Prefix(AgentBuildData agentBuildData)
     {

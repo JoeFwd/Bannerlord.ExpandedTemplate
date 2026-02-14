@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using TaleWorlds.Core;
@@ -10,16 +12,19 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 public class EquipmentPoolsMapper
 {
     private readonly EquipmentMapper _equipmentMapper;
+    private readonly EquipmentFactory _equipmentFactory;
 
     private readonly FieldInfo? _equipmentsFieldInfo =
         typeof(MBEquipmentRoster).GetField("_equipments", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    public EquipmentPoolsMapper(EquipmentMapper equipmentMapper, ILoggerFactory loggerFactory)
+    public EquipmentPoolsMapper(EquipmentMapper equipmentMapper, ILoggerFactory loggerFactory,
+        EquipmentFactory equipmentFactory)
     {
         ILogger logger = loggerFactory.CreateLogger<EquipmentMapper>();
         if (_equipmentsFieldInfo is null)
             logger.Error("Could not find the '_equipments' field in the MBEquipmentRoster class via reflection.");
         _equipmentMapper = equipmentMapper;
+        _equipmentFactory = equipmentFactory;
     }
 
     /// <summary>
@@ -41,23 +46,32 @@ public class EquipmentPoolsMapper
             .Select(equipment => _equipmentMapper.Map(equipment, equipmentRosterTemplate))
             .ToList();
 
-        var secondaryLoadouts = primaryLoadouts
-            .Select(equipmentLoadout => CloneEquipment(equipmentLoadout, !equipmentLoadout.IsCivilian))
-            .ToList();
+        List<List<Equipment>> loadoutTypes = new();
 
-        // Add equipment twice but with different flags (battle/civilian).
-        // Bannerlord filters out civilian/battle equipment depending on the IsCivilian flag => Equipment.GetRandomEquipmentElements.
+        // Add equipment for each equipment type (battle/civilian/stealth).
+        // Bannerlord filters out civilian/battle equipment depending on the equipment type flag => Equipment.GetRandomEquipmentElements.
         // We've prepared the equipment for a specific scenario type, and we want Bannerlord to use our equipment irrespective of that flag.
-        // Therefore, we duplicate the equipment so it can be utilized by Bannerlord in any native scenario (battle/civilian).
-        equipmentList.AddRange(primaryLoadouts);
-        equipmentList.AddRange(secondaryLoadouts);
+        // Therefore, we duplicate the equipment so it can be used by Bannerlord in any native scenario (battle/civilian).
+        foreach
+            (Equipment.EquipmentType equipmentType in
+             Enum.GetValues(typeof(Equipment.EquipmentType)))
+        {
+            if (equipmentType.Equals(Equipment.EquipmentType.Invalid)) continue;
+
+            loadoutTypes.Add(primaryLoadouts
+                .Select(equipmentLoadout => CloneEquipment(equipmentLoadout, equipmentType))
+                .ToList());
+        }
+
+
+        loadoutTypes.ForEach(loadoutType => equipmentList.AddRange(loadoutType));
 
         return resultEquipmentRoster;
     }
 
-    private Equipment CloneEquipment(Equipment originalEquipment, bool isCivilian)
+    private Equipment CloneEquipment(Equipment originalEquipment, Equipment.EquipmentType equipmentType)
     {
-        Equipment clonedEquipment = new Equipment(isCivilian);
+        Equipment clonedEquipment = _equipmentFactory.CreateEquipment(equipmentType);
         clonedEquipment.FillFrom(originalEquipment, false);
         return clonedEquipment;
     }

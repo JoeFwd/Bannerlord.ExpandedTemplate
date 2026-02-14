@@ -11,9 +11,9 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Xml;
 /// </summary>
 public class EquipmentRostersReader : IEquipmentRostersReader
 {
-    private readonly EquipmentRosterXmlReader _rosterReader;
+    private readonly IEquipmentRosterXmlReader _rosterReader;
 
-    public EquipmentRostersReader(EquipmentRosterXmlReader rosterReader)
+    public EquipmentRostersReader(IEquipmentRosterXmlReader rosterReader)
     {
         _rosterReader = rosterReader ?? throw new ArgumentNullException(nameof(rosterReader));
     }

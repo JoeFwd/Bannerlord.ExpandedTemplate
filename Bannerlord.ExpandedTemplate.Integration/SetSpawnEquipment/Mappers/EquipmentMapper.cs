@@ -7,7 +7,10 @@ using TaleWorlds.ObjectSystem;
 
 namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 
-public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory loggerFactory)
+public class EquipmentMapper(
+    MBObjectManager mbObjectManager,
+    ILoggerFactory loggerFactory,
+    EquipmentFactory equipmentFactory)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger<EquipmentMapper>();
 
@@ -49,7 +52,7 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
     private Equipment MapEquipment(Domain.EquipmentPool.Model.Equipment equipment)
     {
         return equipment.GetEquipmentSlots()
-            .Aggregate(new Equipment(false), (equipment1, slot) =>
+            .Aggregate(equipmentFactory.CreateEquipment(Equipment.EquipmentType.Battle), (equipment1, slot) =>
             {
                 try
                 {
@@ -62,7 +65,7 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
                 }
                 catch (ArgumentException e)
                 {
-                    _logger.Error($"Could not parse '{slot.SlotId}' as an EquipmentIndex");
+                    _logger.Error($"Could not parse '{slot.SlotId}' as an EquipmentIndex. Error: {e.Message}");
                 }
 
                 return equipment1;
