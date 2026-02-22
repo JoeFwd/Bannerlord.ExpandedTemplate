@@ -1,0 +1,56 @@
+using System.Collections.Generic;
+using System.Linq;
+using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
+using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Port;
+using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
+
+namespace Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
+
+/// <summary>
+///     Service for retrieving multiple equipment pools for comparison purposes
+///     This class wraps the existing GetEquipmentPool functionality to provide access to all pools
+/// </summary>
+public class GetEquipmentPoolsUtil : IGetEquipmentPoolsUtil
+{
+    private readonly IEncounterTypeProvider _encounterTypeProvider;
+    private readonly ITroopBattleEquipmentProvider _troopBattleEquipmentProvider;
+    private readonly ITroopSiegeEquipmentProvider _troopSiegeEquipmentProvider;
+    private readonly ITroopCivilianEquipmentProvider _troopCivilianEquipmentProvider;
+    private readonly ILogger _logger;
+
+    public GetEquipmentPoolsUtil(
+        IEncounterTypeProvider encounterTypeProvider,
+        ITroopBattleEquipmentProvider troopBattleEquipmentProvider,
+        ITroopSiegeEquipmentProvider troopSiegeEquipmentProvider,
+        ITroopCivilianEquipmentProvider troopCivilianEquipmentProvider,
+        ILoggerFactory loggerFactory)
+    {
+        _encounterTypeProvider = encounterTypeProvider;
+        _troopBattleEquipmentProvider = troopBattleEquipmentProvider;
+        _troopSiegeEquipmentProvider = troopSiegeEquipmentProvider;
+        _troopCivilianEquipmentProvider = troopCivilianEquipmentProvider;
+        _logger = loggerFactory.CreateLogger<GetEquipmentPoolsUtil>();
+    }
+
+    public IList<Model.EquipmentPool> GetEquipmentPools(string troopId)
+    {
+        _logger.Debug(
+            $"Getting equipment pools from {_encounterTypeProvider.GetEncounterType()} for troop '{troopId}'.");
+
+        IList<Model.EquipmentPool> equipmentPools = _encounterTypeProvider.GetEncounterType() switch
+        {
+            EncounterType.Battle => _troopBattleEquipmentProvider.GetBattleTroopEquipmentPools(troopId),
+            EncounterType.Siege => _troopSiegeEquipmentProvider.GetSiegeTroopEquipmentPools(troopId),
+            EncounterType.Civilian => _troopCivilianEquipmentProvider.GetCivilianTroopEquipmentPools(troopId),
+            _ => _troopBattleEquipmentProvider.GetBattleTroopEquipmentPools(troopId)
+        };
+
+        if (!equipmentPools.SelectMany(e => e.GetEquipmentLoadouts()).Any())
+            _logger.Warn(
+                $"No equipment found for troop '{troopId}' in {_encounterTypeProvider.GetEncounterType()} encounter.");
+
+        _logger.Debug($"Troop '{troopId}' has {equipmentPools.Count} equipment pool(s)");
+
+        return equipmentPools;
+    }
+}

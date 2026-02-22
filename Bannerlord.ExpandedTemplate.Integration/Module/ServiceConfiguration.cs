@@ -97,6 +97,7 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             services.AddSingleton<IRandom, Random>();
             services.AddSingleton<IEquipmentPoolPicker, EquipmentPoolPicker>();
             services.AddSingleton<IGetEquipmentPool, GetEquipmentPool>();
+            services.AddSingleton<IGetEquipmentPoolsUtil, GetEquipmentPoolsUtil>();
             services.AddSingleton<IGetEquipment, GetEquipment>();
             
             // Register mission-specific services
