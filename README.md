@@ -11,10 +11,10 @@ for easier debugging and development.
     - Allows multiple equipment pools.
     - Any **civilian** mission now reads only civilian XML equipment templates. Bannerlord previously had inconsistencies such as:
         - Mercenaries using battle equipment in taverns while other characters use civilian templates in a supposedly "friendly" mission.
-        - Town guards (e.g. `guard_vlandia`) using battle equipment templates during friendly town visits.  
+        - Town guards (e.g. `guard_vlandia`) using battle equipment templates during friendly town visits.
           Now, all such cases require a civilian tag.
     - Equipment templates may specify multiple mission types (e.g. `"civilian"=true`, `"battle"=true`), reducing the amount of duplicated equipment XML.
-
+    - Automatically equips characters who spawn without gear using a template from their equipment XML (e.g., when no tournament templates are defined in the culture XML).  
 For more details, check out the [Expanded Equipment API Documentation](docs/expanded-equipment-api.md).
 
 ## Usage
