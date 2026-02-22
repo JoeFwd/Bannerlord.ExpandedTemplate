@@ -1,4 +1,4 @@
-﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
+using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Mappers;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
 using NUnit.Framework;
@@ -49,5 +49,40 @@ public class EquipmentRosterMapperShould
                     })
                 },
                 0)));
+    }
+
+    [Test]
+    public void MapsToEquipmentPool_WithItemPattern()
+    {
+        var equipmentRoster = new EquipmentRoster
+        {
+            Pool = "10",
+            Equipment = new List<Equipment>
+            {
+                new()
+                {
+                    Slot = "Head",
+                    Id = "Item.Helmet"
+                },
+                new()
+                {
+                    Slot = "Body",
+                    Id = "Item.Armor"
+                }
+            }
+        };
+
+        var equipmentPool = _equipmentRosterMapper.MapToEquipmentPool(equipmentRoster);
+
+        Assert.That(equipmentPool,
+            Is.EqualTo(new Domain.EquipmentPool.Model.EquipmentPool(new List<Domain.EquipmentPool.Model.Equipment>
+                {
+                    new(new List<EquipmentSlot>
+                    {
+                        new("Head", "Helmet"),
+                        new("Body", "Armor")
+                    })
+                },
+                10)));
     }
 }
