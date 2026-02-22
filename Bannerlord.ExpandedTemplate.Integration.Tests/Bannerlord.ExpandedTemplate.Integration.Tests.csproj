@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Platforms>x64</Platforms>
+    <LangVersion>12.0</LangVersion>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
+    <PackageReference Include="Moq" Version="4.20.70"/>
+    <PackageReference Include="NUnit" Version="3.13.3"/>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1"/>
+    <PackageReference Include="NUnit.Analyzers" Version="3.6.1"/>
+    <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Integration\Bannerlord.ExpandedTemplate.Integration.csproj" />
+    <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj" />
+    <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- Reference TaleWorlds assemblies from GameFolder -->
+  <ItemGroup>
+    <Reference Include="$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.Core.dll">
+      <HintPath>%(Identity)</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Custom target to copy TaleWorlds assemblies to output directory -->
+  <Target Name="CopyTaleWorldsAssemblies" BeforeTargets="Build">
+    <ItemGroup>
+      <TaleWorldsAssemblies Include="$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.*.dll" />
+    </ItemGroup>
+    <Message Text="Copying TaleWorlds assemblies from $(GameFolder)\bin\Win64_Shipping_Client\ to $(MSBuildProjectDirectory)\$(OutputPath)\\" Importance="high" />
+    <Copy SourceFiles="@(TaleWorldsAssemblies)" DestinationFolder="$(OutputPath)" />
+    <Message Text="Finished copying TaleWorlds assemblies to $(OutputPath)" Importance="high" />
+  </Target>
+</Project>

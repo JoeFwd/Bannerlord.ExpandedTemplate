@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\test.yml = .github\workflows\test.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bannerlord.ExpandedTemplate.Integration.Tests", "Bannerlord.ExpandedTemplate.Integration.Tests\Bannerlord.ExpandedTemplate.Integration.Tests.csproj", "{EB3D1319-085B-4DB4-B2B4-73B54EC390D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -73,6 +75,10 @@ Global
 		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Debug|x64.Build.0 = Debug|Any CPU
 		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Release|x64.ActiveCfg = Release|Any CPU
 		{5AE054A6-7575-4FEF-A321-5D5CD6A38C72}.Release|x64.Build.0 = Release|Any CPU
+		{EB3D1319-085B-4DB4-B2B4-73B54EC390D5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EB3D1319-085B-4DB4-B2B4-73B54EC390D5}.Debug|x64.Build.0 = Debug|Any CPU
+		{EB3D1319-085B-4DB4-B2B4-73B54EC390D5}.Release|x64.ActiveCfg = Release|Any CPU
+		{EB3D1319-085B-4DB4-B2B4-73B54EC390D5}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

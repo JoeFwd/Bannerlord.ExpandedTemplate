@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Version>$(BuildVersion)</Version>
-    <TargetFrameworks>netstandard2.0;net6;net472</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net472</TargetFrameworks>
     <Platforms>x64</Platforms>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>

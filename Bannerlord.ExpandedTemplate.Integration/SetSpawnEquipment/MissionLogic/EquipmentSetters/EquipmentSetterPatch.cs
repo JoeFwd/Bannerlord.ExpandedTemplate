@@ -17,17 +17,23 @@ public class EquipmentSetterPatch : IPatch
     private static CharacterEquipmentRosterReference _characterEquipmentRosterReference;
     private static EquipmentPoolsMapper _equipmentPoolsMapper;
     private static ILogger _logger;
+    private static BannerlordEquipmentMapper _bannerlordEquipmentMapper;
+    private static IEquipmentComparison _equipmentComparison;
 
     public EquipmentSetterPatch(HeroEquipmentGetter heroEquipmentGetter,
         IGetEquipmentPool getEquipmentPool,
         CharacterEquipmentRosterReference characterEquipmentRosterReference,
         EquipmentPoolsMapper equipmentPoolsMapper,
+        BannerlordEquipmentMapper bannerlordEquipmentMapper,
+        IEquipmentComparison equipmentComparison,
         ILoggerFactory loggerFactory)
     {
         _heroEquipmentGetter = heroEquipmentGetter;
         _getEquipmentPool = getEquipmentPool;
         _characterEquipmentRosterReference = characterEquipmentRosterReference;
         _equipmentPoolsMapper = equipmentPoolsMapper;
+        _bannerlordEquipmentMapper = bannerlordEquipmentMapper;
+        _equipmentComparison = equipmentComparison;
         _logger = loggerFactory.CreateLogger<EquipmentSetterPatch>();
     }
 
@@ -45,7 +51,7 @@ public class EquipmentSetterPatch : IPatch
         
         MBEquipmentRoster? equipmentRosterReference =
             _characterEquipmentRosterReference.GetEquipmentRoster(agentBuildData.AgentCharacter);
-
+    
         if (equipmentRosterReference is null) return true;
         if (!CanOverrideEquipment(agentBuildData.AgentCharacter))
         {
@@ -53,14 +59,31 @@ public class EquipmentSetterPatch : IPatch
             return true;
         }
 
-        Domain.EquipmentPool.Model.EquipmentPool equipmentPool = GetEquipmentPool(agentBuildData.AgentCharacter);
+        if (agentBuildData.AgentOverridenSpawnEquipment is not null && !IsEquipmentDefinedInXml(agentBuildData.AgentOverridenSpawnEquipment,
+                agentBuildData.AgentCharacter.StringId))
+        {
+            _logger.Debug(
+                $"Custom equipment set via code for {agentBuildData.AgentCharacter.StringId} doesn't match any equipment template from the xml");
 
+
+            if (!agentBuildData.AgentOverridenSpawnEquipment.IsEmpty())
+            {
+                _logger.Debug("Using custom equipment as is");
+                return true;
+            }
+
+            _logger.Debug("Custom equipment is empty so it's better to use one from the XML");
+        }
+
+        Domain.EquipmentPool.Model.EquipmentPool equipmentPool = GetEquipmentPool(agentBuildData.AgentCharacter);
+    
         _logger.Debug(
             $"Selecting equipment pool number '{equipmentPool.GetPoolId()}' which contains {equipmentPool.GetEquipmentLoadouts().Count} loadouts.");
         
         Equipment equipment;
         if (agentBuildData.AgentCharacter.IsHero)
         {
+            _logger.Debug($"Getting hero equipment from pool for {agentBuildData.AgentCharacter.StringId}");
             equipment = _heroEquipmentGetter.GetEquipmentFromEquipmentPool(agentBuildData.AgentCharacter,
                 equipmentPool);
         }
@@ -77,33 +100,23 @@ public class EquipmentSetterPatch : IPatch
         }
 
         agentBuildData.FixedEquipment(true).Equipment(equipment);
-
+    
         if (equipment.IsEmpty())
             _logger.Warn(
                 $"Troop '{agentBuildData.AgentCharacter.Name.Value}' with id '{agentBuildData.AgentCharacter.StringId}' spawned with no equipment.");
-
+    
         _logger.Debug($"--- END Equipment for Agent {agentBuildData.AgentCharacter.StringId} ---");
-
+    
         return true;
     }
 
-    /// <summary>
-    ///     Temporary initialiser
-    /// </summary>
-    /// <param name="heroEquipmentGetter"></param>
-    /// <param name="getEquipmentPool"></param>
-    /// <param name="characterEquipmentRosterReference"></param>
-    /// <param name="equipmentPoolsMapper"></param>
-    public static void Initialise(HeroEquipmentGetter heroEquipmentGetter,
-        IGetEquipmentPool getEquipmentPool,
-        CharacterEquipmentRosterReference characterEquipmentRosterReference,
-        EquipmentPoolsMapper equipmentPoolsMapper, ILoggerFactory loggerFactory)
+    private static bool IsEquipmentDefinedInXml(Equipment equipment, string troopId)
     {
-        _heroEquipmentGetter = heroEquipmentGetter;
-        _getEquipmentPool = getEquipmentPool;
-        _characterEquipmentRosterReference = characterEquipmentRosterReference;
-        _equipmentPoolsMapper = equipmentPoolsMapper;
-        _logger = loggerFactory.CreateLogger<EquipmentSetterPatch>();
+        var currentEquipment =
+            _bannerlordEquipmentMapper.MapToDomain(equipment);
+        bool shouldOverride =
+            _equipmentComparison.ShouldOverrideEquipment(currentEquipment, troopId);
+        return shouldOverride;
     }
 
     private static Domain.EquipmentPool.Model.EquipmentPool GetEquipmentPool(BasicCharacterObject character)

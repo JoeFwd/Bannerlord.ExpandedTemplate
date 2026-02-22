@@ -99,10 +99,12 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             services.AddSingleton<IGetEquipmentPool, GetEquipmentPool>();
             services.AddSingleton<IGetEquipmentPoolsUtil, GetEquipmentPoolsUtil>();
             services.AddSingleton<IGetEquipment, GetEquipment>();
+            services.AddSingleton<IEquipmentComparison, EquipmentComparison>();
             
             // Register mission-specific services
             services.AddTransient<CharacterEquipmentRosterReference>();
             services.AddTransient<HeroEquipmentGetter>();
+            services.AddSingleton<BannerlordEquipmentMapper>();
             
             // Register campaign behaviors
             services.AddTransient<CampaignBehaviorBase, CampaignLoadEquipmentPoolHandler>();
