@@ -1,6 +1,7 @@
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Port;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Util;
+using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Battle;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Civilian;
@@ -60,37 +61,40 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             // Register equipment roster providers
             services.AddSingleton<SiegeEquipmentRosterProvider>();
             services.AddSingleton<CivilianEquipmentRosterProvider>();
-            services.AddSingleton<BattleEquipmentRosterProvider>();
-            
-            // Register equipment pools providers
-            services.AddSingleton<IEquipmentPoolsProvider, EquipmentPoolsProvider>(sp => 
-                new EquipmentPoolsProvider(
-                    sp.GetRequiredService<BattleEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IEquipmentRosterMapper>(),
-                    sp.GetRequiredService<ICachingProvider>()
-                ));
-            
-            services.AddSingleton<IEquipmentPoolsProvider, EquipmentPoolsProvider>(sp => 
-                new EquipmentPoolsProvider(
+            services.AddSingleton<BattleEquipmentRosterProvider>(sp =>
+                new BattleEquipmentRosterProvider(
                     sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IEquipmentRosterMapper>(),
-                    sp.GetRequiredService<ICachingProvider>()
-                ));
-            
-            services.AddSingleton<IEquipmentPoolsProvider, EquipmentPoolsProvider>(sp => 
-                new EquipmentPoolsProvider(
                     sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
-                    sp.GetRequiredService<IEquipmentRosterMapper>(),
-                    sp.GetRequiredService<ICachingProvider>()
-                ));
+                    sp.GetRequiredService<INpcCharacterWithResolvedEquipmentProvider>()));
             
-            // Register equipment provider services
-            services.AddSingleton<ITroopBattleEquipmentProvider, TroopBattleEquipmentPoolProvider>();
-            services.AddSingleton<ITroopSiegeEquipmentProvider, TroopSiegeEquipmentPoolProvider>();
-            services.AddSingleton<ITroopCivilianEquipmentProvider, TroopCivilianEquipmentPoolProvider>();
+            // Register equipment provider services - each wired to its own EquipmentPoolsProvider
+            // to avoid DI ambiguity (GetRequiredService<IEquipmentPoolsProvider> would return the last registration)
+            services.AddSingleton<ITroopBattleEquipmentProvider>(sp =>
+                new TroopBattleEquipmentPoolProvider(
+                    sp.GetRequiredService<ILoggerFactory>(),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<BattleEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>())));
+
+            services.AddSingleton<ITroopSiegeEquipmentProvider>(sp =>
+                new TroopSiegeEquipmentPoolProvider(
+                    sp.GetRequiredService<ILoggerFactory>(),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>())));
+
+            services.AddSingleton<ITroopCivilianEquipmentProvider>(sp =>
+                new TroopCivilianEquipmentPoolProvider(
+                    sp.GetRequiredService<ILoggerFactory>(),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>())));
             services.AddSingleton<IEncounterTypeProvider, EncounterTypeProvider>();
             
             // Register domain services
@@ -107,7 +111,24 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             services.AddSingleton<BannerlordEquipmentMapper>();
             
             // Register campaign behaviors
-            services.AddTransient<CampaignBehaviorBase, CampaignLoadEquipmentPoolHandler>();
+            services.AddTransient<CampaignBehaviorBase>(sp =>
+                new CampaignLoadEquipmentPoolHandler(
+                    sp.GetRequiredService<ICacheInvalidator>(),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<BattleEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>()),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>()),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>())));
 
             services.AddTransient<EquipmentFactory>();
             services.AddSingleton<IPatch, EquipmentSetterPatch>();
