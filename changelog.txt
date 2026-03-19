@@ -1,4 +1,14 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.1
+Game Versions: v1.2.12
+
+Bug Fixes:
+* Fixed a DI wiring bug where TroopSiegeEquipmentPoolProvider and TroopBattleEquipmentPoolProvider
+  incorrectly received the civilian equipment pool due to multiple IEquipmentPoolsProvider
+  registrations all resolving to the last (civilian) registration.
+  This caused ERROR-level log spam from EquipmentMapper and agents spawning with civilian gear
+  during siege and battle encounters.
+---------------------------------------------------------------------------------------------------
 Version: 1.3.0
 Game Versions: v1.2.12
 Bug Fixes:
