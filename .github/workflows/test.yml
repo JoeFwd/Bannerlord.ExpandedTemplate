@@ -29,7 +29,8 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          dotnet test --collect:"XPlat Code Coverage" --results-directory ./coverage
+          dotnet test Bannerlord.ExpandedTemplate.Domain.Tests/Bannerlord.ExpandedTemplate.Domain.Tests.csproj --collect:"XPlat Code Coverage" --results-directory ./coverage
+          dotnet test Bannerlord.ExpandedTemplate.Infrastructure.Tests/Bannerlord.ExpandedTemplate.Infrastructure.Tests.csproj --collect:"XPlat Code Coverage" --results-directory ./coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4.3.0

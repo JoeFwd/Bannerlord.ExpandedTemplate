@@ -3,6 +3,7 @@ using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.EquipmentRosters;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Xml;
 using Bannerlord.ExpandedTemplate.Infrastructure.Exception;
 using Moq;
 using NUnit.Framework;
@@ -11,13 +12,14 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.Tests.EquipmentPool.List.Re
 
 public class EquipmentRosterRepositoryShould
 {
-    private const string CachedObjectId = "irrelevant_cached_object_id"; 
-    
+    private const string CachedObjectId = "irrelevant_cached_object_id";
+
     private Mock<IXmlProcessor> _xmlProcessor;
     private Mock<ICachingProvider> _cacheProvider;
     private Mock<ILoggerFactory> _loggerFactory;
+    private Mock<IEquipmentRostersReader> _rostersReaderMock; // <- added mock field
     private IEquipmentRosterRepository _equipmentRosterRepository;
-
+    
     [SetUp]
     public void Setup()
     {
@@ -26,97 +28,62 @@ public class EquipmentRosterRepositoryShould
         _loggerFactory = new Mock<ILoggerFactory>(MockBehavior.Strict);
         _loggerFactory.Setup(factory => factory.CreateLogger<IEquipmentRosterRepository>())
             .Returns(new Mock<ILogger>(MockBehavior.Strict).Object);
+
+        _rostersReaderMock = new Mock<IEquipmentRostersReader>(MockBehavior.Strict);
+
+
         _equipmentRosterRepository =
-            new EquipmentRosterRepository(_xmlProcessor.Object, _cacheProvider.Object, _loggerFactory.Object);
+            new EquipmentRosterRepository(
+                _xmlProcessor.Object,
+                _rostersReaderMock.Object,
+                _cacheProvider.Object,
+                _loggerFactory.Object);
     }
 
     [Test]
     public void GetEquipmentRosters()
     {
-        string xml =
-            """
-            <EquipmentRosters>
-                <EquipmentRoster id="irrelevant_equipment_roster_id" culture="irrelevant_culture_id">
-                    <EquipmentSet civilian="irrelevant_civilian_flag" siege="irrelevant_siege_flag" pool="irrelevant_pool_id">
-                        <Equipment slot="irrelevant_slot_1" id="irrelevant_slot_id_1"/>
-                        <Equipment slot="irrelevant_slot_2" id="irrelevant_slot_id_2"/>
-                    </EquipmentSet>
-                    <EquipmentSet/>
-                </EquipmentRoster>
-                <EquipmentRoster id="irrelevant_empty_equipment_roster_id"/>
-            </EquipmentRosters>
-            """;
+        string xml = "<EquipmentRosters />";
+
+        var equipmentRosters = new List<EquipmentRoster> { new() };
+        _rostersReaderMock.Setup(r => r.ReadAll(xml))
+            .Returns((string xml) => equipmentRosters);
 
         _xmlProcessor.Setup(processor => processor.GetXmlNodes(EquipmentRosterRepository.EquipmentRostersRootTag))
             .Returns(XDocument.Parse(xml));
         _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>(), CacheDataType.Xml))
             .Returns(CachedObjectId);
 
-        EquipmentRosters equipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
+        EquipmentRosters actualEquipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
 
-        Assert.That(equipmentRosters, Is.EqualTo(new EquipmentRosters
-        {
-            EquipmentRoster = new List<EquipmentRoster>
-            {
-                new()
-                {
-                    Id = "irrelevant_equipment_roster_id",
-                    EquipmentSet = new List<EquipmentSet>
-                    {
-                        new()
-                        {
-                            Equipment = new List<Equipment>
-                            {
-                                new()
-                                {
-                                    Slot = "irrelevant_slot_1",
-                                    Id = "irrelevant_slot_id_1"
-                                },
-                                new()
-                                {
-                                    Slot = "irrelevant_slot_2",
-                                    Id = "irrelevant_slot_id_2"
-                                }
-                            },
-                            Pool = "irrelevant_pool_id",
-                            IsCivilian = "irrelevant_civilian_flag",
-                            IsSiege = "irrelevant_siege_flag"
-                        },
-                        new()
-                    }
-                },
-                new()
-                {
-                    Id = "irrelevant_empty_equipment_roster_id"
-                }
-            }
-        }));
+        Assert.That(actualEquipmentRosters,
+            Is.EqualTo(new EquipmentRosters { EquipmentRoster = equipmentRosters }));
     }
 
     [Test]
-    public void GetCachedNpcCharacters()
+    public void GetCachedEquipmentRosters_ReturnsCachedResult()
     {
-        string xml = "<EquipmentRosters/>";
-
-        _xmlProcessor.Setup(processor => processor.GetXmlNodes(EquipmentRosterRepository.EquipmentRostersRootTag))
+        string xml = "<EquipmentRosters />";
+        var equipmentRosters = new List<EquipmentRoster>();
+        _rostersReaderMock.Setup(r => r.ReadAll(xml))
+            .Returns((string xml) => equipmentRosters);
+        _xmlProcessor.Setup(p => p.GetXmlNodes(EquipmentRosterRepository.EquipmentRostersRootTag))
             .Returns(XDocument.Parse(xml));
-        _cacheProvider.Setup(provider => provider.CacheObject(It.IsAny<EquipmentRosters>(), CacheDataType.Xml))
+        _cacheProvider.Setup(c => c.CacheObject(It.IsAny<EquipmentRosters>(), CacheDataType.Xml))
             .Returns(CachedObjectId);
 
-        // First call to populate cache
-        var equipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
+        _equipmentRosterRepository.GetEquipmentRosters();
 
-        _cacheProvider.Verify(provider => provider.CacheObject(equipmentRosters, CacheDataType.Xml), Times.Once);
+        var cachedEquipmentRosters = new EquipmentRosters { EquipmentRoster = new List<EquipmentRoster> { new() } };
+        _cacheProvider.Setup(c => c.GetObject<EquipmentRosters>(CachedObjectId))
+            .Returns(cachedEquipmentRosters);
 
-        _cacheProvider.Setup(cache => cache.GetObject<EquipmentRosters>(CachedObjectId))
-            .Returns(new EquipmentRosters());
+        var secondResult = _equipmentRosterRepository.GetEquipmentRosters();
 
-        EquipmentRosters cachedEquipmentRosters = _equipmentRosterRepository.GetEquipmentRosters();
-
+        Assert.That(secondResult, Is.EqualTo(cachedEquipmentRosters));
         _cacheProvider.VerifyAll();
-        Assert.That(cachedEquipmentRosters, Is.EqualTo(equipmentRosters));
     }
-    
+
     [Test]
     public void ThrowsTechnicalException_WhenIOErrorOccurs()
     {

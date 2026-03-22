@@ -12,16 +12,19 @@ namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 public class EquipmentPoolsMapper
 {
     private readonly EquipmentMapper _equipmentMapper;
+    private readonly EquipmentFactory _equipmentFactory;
 
     private readonly FieldInfo? _equipmentsFieldInfo =
         typeof(MBEquipmentRoster).GetField("_equipments", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    public EquipmentPoolsMapper(EquipmentMapper equipmentMapper, ILoggerFactory loggerFactory)
+    public EquipmentPoolsMapper(EquipmentMapper equipmentMapper, ILoggerFactory loggerFactory,
+        EquipmentFactory equipmentFactory)
     {
         ILogger logger = loggerFactory.CreateLogger<EquipmentMapper>();
         if (_equipmentsFieldInfo is null)
             logger.Error("Could not find the '_equipments' field in the MBEquipmentRoster class via reflection.");
         _equipmentMapper = equipmentMapper;
+        _equipmentFactory = equipmentFactory;
     }
 
     /// <summary>
@@ -68,7 +71,7 @@ public class EquipmentPoolsMapper
 
     private Equipment CloneEquipment(Equipment originalEquipment, Equipment.EquipmentType equipmentType)
     {
-        Equipment clonedEquipment = new Equipment(equipmentType);
+        Equipment clonedEquipment = _equipmentFactory.CreateEquipment(equipmentType);
         clonedEquipment.FillFrom(originalEquipment, false);
         return clonedEquipment;
     }

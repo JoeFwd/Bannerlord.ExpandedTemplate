@@ -1,0 +1,143 @@
+using System.Reflection;
+using Bannerlord.ExpandedTemplate.Domain.EquipmentPool;
+using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
+using Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
+using Harmony.DependencyInjection.Patches;
+using TaleWorlds.CampaignSystem;
+using TaleWorlds.Core;
+using TaleWorlds.MountAndBlade;
+using Equipment = TaleWorlds.Core.Equipment;
+
+namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.MissionLogic.EquipmentSetters;
+
+public class EquipmentSetterPatch : IPatch
+{
+    private static HeroEquipmentGetter _heroEquipmentGetter;
+    private static IGetEquipmentPool _getEquipmentPool;
+    private static CharacterEquipmentRosterReference _characterEquipmentRosterReference;
+    private static EquipmentPoolsMapper _equipmentPoolsMapper;
+    private static ILogger _logger;
+    private static BannerlordEquipmentMapper _bannerlordEquipmentMapper;
+    private static IEquipmentComparison _equipmentComparison;
+
+    public EquipmentSetterPatch(HeroEquipmentGetter heroEquipmentGetter,
+        IGetEquipmentPool getEquipmentPool,
+        CharacterEquipmentRosterReference characterEquipmentRosterReference,
+        EquipmentPoolsMapper equipmentPoolsMapper,
+        BannerlordEquipmentMapper bannerlordEquipmentMapper,
+        IEquipmentComparison equipmentComparison,
+        ILoggerFactory loggerFactory)
+    {
+        _heroEquipmentGetter = heroEquipmentGetter;
+        _getEquipmentPool = getEquipmentPool;
+        _characterEquipmentRosterReference = characterEquipmentRosterReference;
+        _equipmentPoolsMapper = equipmentPoolsMapper;
+        _bannerlordEquipmentMapper = bannerlordEquipmentMapper;
+        _equipmentComparison = equipmentComparison;
+        _logger = loggerFactory.CreateLogger<EquipmentSetterPatch>();
+    }
+
+    public MethodInfo? TargetMethod =>
+        typeof(Mission).GetMethod("SpawnAgent", BindingFlags.Public | BindingFlags.Instance);
+
+    public MethodInfo? PatchMethod =>
+        typeof(EquipmentSetterPatch).GetMethod("Prefix", BindingFlags.Public | BindingFlags.Static);
+
+    public PatchType PatchType => PatchType.Prefix;
+
+    public static bool Prefix(AgentBuildData agentBuildData)
+    {
+        _logger.Debug($"--- START Equipment for Agent {agentBuildData.AgentCharacter.StringId} ---");
+        
+        MBEquipmentRoster? equipmentRosterReference =
+            _characterEquipmentRosterReference.GetEquipmentRoster(agentBuildData.AgentCharacter);
+    
+        if (equipmentRosterReference is null) return true;
+        if (!CanOverrideEquipment(agentBuildData.AgentCharacter))
+        {
+            _logger.Debug($"{agentBuildData.AgentCharacter.StringId} is not applicable to equipment override");
+            return true;
+        }
+
+        if (agentBuildData.AgentOverridenSpawnEquipment is not null && !IsEquipmentDefinedInXml(agentBuildData.AgentOverridenSpawnEquipment,
+                agentBuildData.AgentCharacter.StringId))
+        {
+            _logger.Debug(
+                $"Custom equipment set via code for {agentBuildData.AgentCharacter.StringId} doesn't match any equipment template from the xml");
+
+
+            if (!agentBuildData.AgentOverridenSpawnEquipment.IsEmpty())
+            {
+                _logger.Debug("Using custom equipment as is");
+                return true;
+            }
+
+            _logger.Debug("Custom equipment is empty so it's better to use one from the XML");
+        }
+
+        Domain.EquipmentPool.Model.EquipmentPool equipmentPool = GetEquipmentPool(agentBuildData.AgentCharacter);
+    
+        _logger.Debug(
+            $"Selecting equipment pool number '{equipmentPool.GetPoolId()}' which contains {equipmentPool.GetEquipmentLoadouts().Count} loadouts.");
+        
+        Equipment equipment;
+        if (agentBuildData.AgentCharacter.IsHero)
+        {
+            _logger.Debug($"Getting hero equipment from pool for {agentBuildData.AgentCharacter.StringId}");
+            equipment = _heroEquipmentGetter.GetEquipmentFromEquipmentPool(agentBuildData.AgentCharacter,
+                equipmentPool);
+        }
+        else
+        {
+            MBEquipmentRoster mbEquipmentRoster =
+                _equipmentPoolsMapper.MapEquipmentPool(equipmentPool, equipmentRosterReference);
+            var characterEquipmentContainer = new BasicCharacterObject();
+            _characterEquipmentRosterReference.SetEquipmentRoster(characterEquipmentContainer, mbEquipmentRoster);
+
+            equipment = Equipment.GetRandomEquipmentElements(characterEquipmentContainer,
+                !Game.Current.GameType.IsCoreOnlyGameMode,
+                agentBuildData.AgentCivilianEquipment, agentBuildData.AgentEquipmentSeed);
+        }
+
+        agentBuildData.FixedEquipment(true).Equipment(equipment);
+    
+        if (equipment.IsEmpty())
+            _logger.Warn(
+                $"Troop '{agentBuildData.AgentCharacter.Name.Value}' with id '{agentBuildData.AgentCharacter.StringId}' spawned with no equipment.");
+    
+        _logger.Debug($"--- END Equipment for Agent {agentBuildData.AgentCharacter.StringId} ---");
+    
+        return true;
+    }
+
+    private static bool IsEquipmentDefinedInXml(Equipment equipment, string troopId)
+    {
+        var currentEquipment =
+            _bannerlordEquipmentMapper.MapToDomain(equipment);
+        bool shouldOverride =
+            _equipmentComparison.ShouldOverrideEquipment(currentEquipment, troopId);
+        return shouldOverride;
+    }
+
+    private static Domain.EquipmentPool.Model.EquipmentPool GetEquipmentPool(BasicCharacterObject character)
+    {
+        string id = character.StringId;
+        if (character is CharacterObject characterObject)
+            id = characterObject.OriginalCharacter?.StringId ?? id;
+
+        var equipmentPool = _getEquipmentPool.GetTroopEquipmentPool(id);
+        if (equipmentPool.IsEmpty())
+            equipmentPool =
+                _getEquipmentPool.GetTroopEquipmentPool(_characterEquipmentRosterReference.GetEquipmentRoster(character)
+                    .StringId);
+
+        return equipmentPool;
+    }
+
+    private static bool CanOverrideEquipment(BasicCharacterObject character)
+    {
+        return character is not null &&
+               !(Clan.PlayerClan?.Heroes?.Exists(hero =>
+                   hero?.StringId is not null && character.StringId == hero.StringId) ?? true);
+    }
+}

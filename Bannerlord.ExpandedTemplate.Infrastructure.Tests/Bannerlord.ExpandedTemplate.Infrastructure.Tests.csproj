@@ -28,8 +28,4 @@
       <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="EquipmentPool\TestUtil\"/>
-    </ItemGroup>
-
 </Project>

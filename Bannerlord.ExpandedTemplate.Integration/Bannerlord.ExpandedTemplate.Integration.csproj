@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <Version>$(BuildVersion)</Version>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0;net472</TargetFrameworks>
     <Platforms>x64</Platforms>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
+
+    <GameFolder>D:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord-v1.2</GameFolder>
 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>
@@ -19,16 +21,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Bannerlord.BuildResources" Version="1.1.0.108" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-
     <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(GameVersion).*-*" PrivateAssets="All" />
     <PackageReference Include="Bannerlord.ReferenceAssemblies.Native" Version="$(GameVersion).*-*" PrivateAssets="All" />
     <PackageReference Include="Bannerlord.ReferenceAssemblies.Sandbox" Version="$(GameVersion).*-*" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
 
     <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Domain\Bannerlord.ExpandedTemplate.Domain.csproj" />
     <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Harmony.DependencyInjection" Version="0.2.0" />
   </ItemGroup>
 
 </Project>

@@ -64,7 +64,7 @@ For instance, a Levy Footman is defined as follows:
 
 ### Equipment
 
-The `NPCCharacter` definition requires an `Equipments` tag which contains a list of `EquipmentRoster` and `EquipmentSet` elements. It also accepts the following tags: `equipmentSet`, `equipmentRoster`.
+The `NPCCharacter` definition requires an `Equipments` tag which contains a list of `EquipmentRoster` and `EquipmentSet` elements. It also accepts the following tags: `equipmentSet`, `equipmentRoster`. Both `Equipment` and `equipment` node names are also supported.
 
 #### EquipmentRoster
 

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using TaleWorlds.Core;
 using TaleWorlds.ObjectSystem;
 
 namespace Bannerlord.ExpandedTemplate.Integration.SetSpawnEquipment.Mappers;
 
-public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory loggerFactory)
+public class EquipmentMapper(
+    MBObjectManager mbObjectManager,
+    ILoggerFactory loggerFactory,
+    EquipmentFactory equipmentFactory)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger<EquipmentMapper>();
 
@@ -49,12 +51,12 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
     private Equipment MapEquipment(Domain.EquipmentPool.Model.Equipment equipment)
     {
         return equipment.GetEquipmentSlots()
-            .Aggregate(new Equipment(Equipment.EquipmentType.Battle), (equipment1, slot) =>
+            .Aggregate(equipmentFactory.CreateEquipment(Equipment.EquipmentType.Battle), (equipment1, slot) =>
             {
                 try
                 {
                     EquipmentIndex index = Equipment.GetEquipmentIndexFromOldEquipmentIndexName(slot.SlotId);
-                    ItemObject? item = mbObjectManager.GetObject<ItemObject>(ParseItemId(slot.ItemId));
+                    ItemObject? item = mbObjectManager.GetObject<ItemObject>(slot.ItemId);
                     if (item is null)
                         _logger.Error($"Could not find an item with id '{slot.ItemId}'");
                     else
@@ -67,15 +69,6 @@ public class EquipmentMapper(MBObjectManager mbObjectManager, ILoggerFactory log
 
                 return equipment1;
             });
-    }
-
-    private static string ParseItemId(string id)
-    {
-        string pattern = @"^(Item\.)?(.*)$";
-
-        Match match = Regex.Match(id, pattern);
-
-        return match.Success ? match.Groups[2].Value : id;
     }
 
     private string DisplayNonEmptySlotAndItemIds(Equipment equipmentLoadout)
