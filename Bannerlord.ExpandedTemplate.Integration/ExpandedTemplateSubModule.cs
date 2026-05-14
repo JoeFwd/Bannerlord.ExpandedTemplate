@@ -1,5 +1,6 @@
 using System;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
+using Bannerlord.ExpandedTemplate.Infrastructure.Logging;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Integration.Module;
 using Harmony.DependencyInjection;
@@ -19,6 +20,7 @@ namespace Bannerlord.ExpandedTemplate.Integration
         public ExpandedTemplateSubModule()
         {
             _services = new ServiceCollection();
+            _services.AddSingleton<ILoggerFactory>(new ConsoleLoggerFactory());
             ServiceConfiguration.ConfigureServices(_services);
             _services.AddHarmonyPatching();
             _serviceProvider = _services.BuildServiceProvider();

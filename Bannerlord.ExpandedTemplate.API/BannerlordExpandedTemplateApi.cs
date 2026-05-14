@@ -5,7 +5,7 @@ namespace Bannerlord.ExpandedTemplate.API;
 
 public class BannerlordExpandedTemplateApi
 {
-    private ExpandedTemplateSubModule _expandedTemplateSubModule = new();
+    private ExpandedTemplateSubModule? _expandedTemplateSubModule;
 
     public BannerlordExpandedTemplateApi UseLoggerFactory(ILoggerFactory loggerFactory)
     {
@@ -15,6 +15,6 @@ public class BannerlordExpandedTemplateApi
 
     public void Bind()
     {
-        _expandedTemplateSubModule.Inject();
+        (_expandedTemplateSubModule ??= new ExpandedTemplateSubModule()).Inject();
     }
 }

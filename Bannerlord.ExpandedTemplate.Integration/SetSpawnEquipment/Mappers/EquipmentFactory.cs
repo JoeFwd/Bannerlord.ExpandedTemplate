@@ -11,6 +11,6 @@ public class EquipmentFactory
     /// <returns>A new Equipment instance</returns>
     public Equipment CreateEquipment(Equipment.EquipmentType equipmentType)
     {
-        return new Equipment(Equipment.EquipmentType.Civilian.Equals(equipmentType));
+        return new Equipment(equipmentType);
     }
 }

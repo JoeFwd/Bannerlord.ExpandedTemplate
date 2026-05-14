@@ -96,7 +96,8 @@ public class EquipmentSetterPatch : IPatch
 
             equipment = Equipment.GetRandomEquipmentElements(characterEquipmentContainer,
                 !Game.Current.GameType.IsCoreOnlyGameMode,
-                agentBuildData.AgentCivilianEquipment, agentBuildData.AgentEquipmentSeed);
+                agentBuildData.AgentCivilianEquipment ? Equipment.EquipmentType.Civilian : Equipment.EquipmentType.Battle,
+                agentBuildData.AgentEquipmentSeed);
         }
 
         agentBuildData.FixedEquipment(true).Equipment(equipment);
