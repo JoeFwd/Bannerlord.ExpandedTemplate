@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
 
-    <GameFolder>D:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord-v1.2</GameFolder>
+    <GameFolder>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\..\..'))</GameFolder>
 
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>

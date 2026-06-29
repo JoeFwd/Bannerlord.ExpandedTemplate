@@ -11,51 +11,13 @@
         <PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>
 
         <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
-        <GameFolder>D:\SteamLibrary\steamapps\common\Mount &amp; Blade II Bannerlord-v1.2</GameFolder>
+        <GameFolder>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\..\..'))</GameFolder>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.44.1"/>
         <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(GameVersion).*-*" PrivateAssets="All"/>
 
         <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Integration\Bannerlord.ExpandedTemplate.Integration.csproj" />
     </ItemGroup>
-
-    <!--    <Target Name="ILRepacker" AfterTargets="Build" Condition="'$(TargetFramework)' == 'net472'">-->
-    <!--        <ItemGroup>-->
-    <!--            &lt;!&ndash; Only merge our own assemblies; exclude third-party DLLs (Harmony, MS.Extensions, etc.)-->
-    <!--                 that would cause duplicate type errors in ILRepack. &ndash;&gt;-->
-    <!--            <InputAssemblies Include="$(OutputPath)Bannerlord.ExpandedTemplate.*.dll"/>-->
-    <!--        </ItemGroup>-->
-
-<!--        <ILRepack-->
-<!--                Parallel="true"-->
-<!--                InputAssemblies="@(InputAssemblies)"-->
-<!--                TargetKind="Dll"-->
-<!--                OutputFile="$(OutputPath)\$(AssemblyName).dll"-->
-<!--        />-->
-
-    <!--&lt;!&ndash;        <ILRepack&ndash;&gt;-->
-    <!--&lt;!&ndash;                Parallel="true"&ndash;&gt;-->
-    <!--&lt;!&ndash;                Internalize="true"&ndash;&gt;-->
-    <!--&lt;!&ndash;                InputAssemblies="@(InputAssemblies)"&ndash;&gt;-->
-    <!--&lt;!&ndash;                TargetKind="Dll"&ndash;&gt;-->
-    <!--&lt;!&ndash;                OutputFile="$(OutputPath)\$(AssemblyName).dll"&ndash;&gt;-->
-    <!--&lt;!&ndash;        />&ndash;&gt;-->
-    <!--    </Target>-->
-
-    <!--    <Target Name="CleanBeforeBuild" AfterTargets="ILRepacker" Condition="'$(TargetFramework)' == 'net472'">-->
-    <!--        <ItemGroup>-->
-    <!--            <FilesToDelete Include="$(OutputPath)\*.*"-->
-    <!--                           Exclude="$(OutputPath)\$(AssemblyName).dll"/>-->
-    <!--        </ItemGroup>-->
-    <!--        <Message Text="Deleting file: %(FilesToDelete.Identity)" Importance="High"/>-->
-
-    <!--        <Delete Files="@(FilesToDelete)"/>-->
-    <!--        &lt;!&ndash;        <Message Text="Renaming $(OutputPath)\$(AssemblyName).Fat.dll to $(OutputPath)\$(AssemblyName).dll" Importance="High"/>&ndash;&gt;-->
-    <!--        &lt;!&ndash;        <Move SourceFiles="$(OutputPath)\$(AssemblyName).Fat.dll"&ndash;&gt;-->
-    <!--        &lt;!&ndash;              DestinationFiles="$(OutputPath)\$(AssemblyName).dll"&ndash;&gt;-->
-    <!--        &lt;!&ndash;              OverwriteReadOnlyFiles="true"/>&ndash;&gt;-->
-    <!--    </Target>-->
 
 </Project>
