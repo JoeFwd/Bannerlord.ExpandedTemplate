@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
@@ -41,29 +40,6 @@ public class NpcCharacterRepository(
         }
     }
 
-    private NpcCharacters MergeDuplicateCharacters(NpcCharacters npcCharacters)
-    {
-        var characterGroups = npcCharacters.NpcCharacter.GroupBy(c => c.Id);
-
-        var mergedCharacters = characterGroups.Select(group =>
-        {
-            var firstCharacter = group.First();
-            var mergedEquipments = new Equipments
-            {
-                EquipmentRoster = group.SelectMany(c => c.Equipments.EquipmentRoster).ToList(),
-                EquipmentSet = group.SelectMany(c => c.Equipments.EquipmentSet).ToList()
-            };
-
-            return new NpcCharacter
-            {
-                Id = firstCharacter.Id,
-                Equipments = mergedEquipments
-            };
-        }).ToList();
-
-        return new NpcCharacters { NpcCharacter = mergedCharacters };
-    }
-
     private void CacheNpcCharacters(NpcCharacters npcCharacters)
     {
         _cachedObjectId = cachingProvider.CacheObject(npcCharacters, CacheDataType.Xml);
@@ -85,7 +61,7 @@ public class NpcCharacterRepository(
         using XmlReader xmlReader = xmlProcessor.GetXmlNodes(NpcCharacterRootTag).CreateReader();
         var serialiser = new XmlSerializer(typeof(NpcCharacters));
         var npcCharacters = (NpcCharacters)serialiser.Deserialize(xmlReader);
-        npcCharacters = MergeDuplicateCharacters(npcCharacters);
+        npcCharacters = NpcCharacterMerger.MergeDuplicates(npcCharacters);
         CacheNpcCharacters(npcCharacters);
         return npcCharacters;
     }
