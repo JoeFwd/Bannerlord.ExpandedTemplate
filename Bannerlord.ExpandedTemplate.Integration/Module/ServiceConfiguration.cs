@@ -65,12 +65,14 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             services.AddSingleton<SiegeEquipmentRosterProvider>();
             services.AddSingleton<CivilianEquipmentRosterProvider>();
             services.AddSingleton<StealthEquipmentRosterProvider>();
+            services.AddSingleton<BattleEquipmentRosterFilter>();
             services.AddSingleton<BattleEquipmentRosterProvider>(sp =>
                 new BattleEquipmentRosterProvider(
                     sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
                     sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
                     sp.GetRequiredService<StealthEquipmentRosterProvider>(),
-                    sp.GetRequiredService<INpcCharacterWithResolvedEquipmentProvider>()));
+                    sp.GetRequiredService<INpcCharacterWithResolvedEquipmentProvider>(),
+                    sp.GetRequiredService<BattleEquipmentRosterFilter>()));
 
             // Register equipment provider services - each wired to its own EquipmentPoolsProvider
             // to avoid DI ambiguity (GetRequiredService<IEquipmentPoolsProvider> would return the last registration)

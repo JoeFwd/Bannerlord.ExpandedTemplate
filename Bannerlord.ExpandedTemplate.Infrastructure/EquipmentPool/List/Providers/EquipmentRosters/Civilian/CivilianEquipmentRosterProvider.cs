@@ -1,27 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
-
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Civilian;
 
-public class CivilianEquipmentRosterProvider : IEquipmentRostersProvider
+public class CivilianEquipmentRosterProvider : FlaggedEquipmentRosterProvider
 {
-    private readonly INpcCharacterWithResolvedEquipmentProvider _npcCharacterWithResolvedEquipmentProvider;
-
-    public CivilianEquipmentRosterProvider(
-        INpcCharacterWithResolvedEquipmentProvider npcCharacterWithResolvedEquipmentProvider)
+    public CivilianEquipmentRosterProvider(INpcCharacterWithResolvedEquipmentProvider npcCharacterWithResolvedEquipmentProvider)
+        : base(npcCharacterWithResolvedEquipmentProvider, equipmentRoster => equipmentRoster.ResolvedIsCivilian)
     {
-        _npcCharacterWithResolvedEquipmentProvider = npcCharacterWithResolvedEquipmentProvider;
-    }
-
-    public IDictionary<string, IList<EquipmentRoster>> GetEquipmentRostersByCharacter()
-    {
-        return _npcCharacterWithResolvedEquipmentProvider.GetNpcCharactersWithResolvedEquipmentRoster()
-            .ToDictionary(character => character.Key, character => character.Value.Where(
-                equipmentRoster =>
-                {
-                    bool.TryParse(equipmentRoster.ResolvedIsCivilian, out bool isCivilian);
-                    return isCivilian;
-                }).ToList() as IList<EquipmentRoster>);
     }
 }
