@@ -7,31 +7,16 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Stealth;
 
 public class TroopStealthEquipmentPoolProvider : ITroopStealthEquipmentProvider
 {
-    private readonly ILogger _logger;
-    private readonly IEquipmentPoolsProvider _stealthEquipmentPoolsProvider;
+    private readonly TroopEquipmentPoolProvider _troopEquipmentPoolProvider;
 
-    public TroopStealthEquipmentPoolProvider(ILoggerFactory loggerFactory,
-        IEquipmentPoolsProvider stealthEquipmentPoolsProvider)
+    public TroopStealthEquipmentPoolProvider(ILoggerFactory loggerFactory, IEquipmentPoolsProvider equipmentPoolsProvider)
     {
-        _logger = loggerFactory.CreateLogger<TroopStealthEquipmentPoolProvider>();
-        _stealthEquipmentPoolsProvider = stealthEquipmentPoolsProvider;
+        _troopEquipmentPoolProvider = new TroopEquipmentPoolProvider(
+            loggerFactory.CreateLogger<TroopStealthEquipmentPoolProvider>(), equipmentPoolsProvider, "stealth");
     }
 
     public IList<Domain.EquipmentPool.Model.EquipmentPool> GetStealthTroopEquipmentPools(string equipmentId)
     {
-        if (string.IsNullOrWhiteSpace(equipmentId))
-        {
-            _logger.Debug("The equipment id is null or empty.");
-            return new List<Domain.EquipmentPool.Model.EquipmentPool>();
-        }
-
-        var troopEquipmentPools = _stealthEquipmentPoolsProvider.GetEquipmentPoolsByCharacterId();
-        if (!troopEquipmentPools.ContainsKey(equipmentId))
-        {
-            _logger.Warn($"The equipment id {equipmentId} is not in the stealth equipment pools.");
-            return new List<Domain.EquipmentPool.Model.EquipmentPool>();
-        }
-
-        return troopEquipmentPools[equipmentId];
+        return _troopEquipmentPoolProvider.GetTroopEquipmentPools(equipmentId);
     }
 }
