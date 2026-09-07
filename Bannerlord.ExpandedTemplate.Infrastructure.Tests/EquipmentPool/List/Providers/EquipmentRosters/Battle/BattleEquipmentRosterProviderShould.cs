@@ -15,6 +15,7 @@ public class BattleEquipmentRosterProviderShould
     private Mock<ICachingProvider> _cacheProvider;
     private Mock<IEquipmentRostersProvider> _civilianEquipmentRosterProvider;
     private Mock<IEquipmentRostersProvider> _siegeEquipmentRosterProvider;
+    private Mock<IEquipmentRostersProvider> _stealthEquipmentRosterProvider;
     private Mock<INpcCharacterWithResolvedEquipmentProvider> _npcCharacterWithResolvedEquipmentProvider;
     private Mock<ILogger> _logger;
     private Mock<ILoggerFactory> _loggerFactory;
@@ -25,6 +26,7 @@ public class BattleEquipmentRosterProviderShould
     {
         _civilianEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>();
         _siegeEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>();
+        _stealthEquipmentRosterProvider = new Mock<IEquipmentRostersProvider>();
         _npcCharacterWithResolvedEquipmentProvider = new Mock<INpcCharacterWithResolvedEquipmentProvider>();
         _cacheProvider = new Mock<ICachingProvider>();
         _logger = new Mock<ILogger>();
@@ -34,7 +36,11 @@ public class BattleEquipmentRosterProviderShould
 
         _battleEquipmentRosterProvider = new BattleEquipmentRosterProvider(
             _siegeEquipmentRosterProvider.Object, _civilianEquipmentRosterProvider.Object,
+            _stealthEquipmentRosterProvider.Object,
             _npcCharacterWithResolvedEquipmentProvider.Object);
+
+        _stealthEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
     }
 
     [Test]
@@ -304,6 +310,81 @@ public class BattleEquipmentRosterProviderShould
     }
 
     [Test]
+    public void GetBattleCharacterEquipment_TaggedByEquipmentType()
+    {
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                {
+                    "Character1",
+                    new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("BattleEquipment1") with { EquipmentType = "Battle" }
+                    }
+                }
+            });
+
+        _civilianEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+        _siegeEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+
+        var equipmentRosterByCharacter = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(equipmentRosterByCharacter, Is.EqualTo(
+            new Dictionary<string, List<EquipmentRoster>>
+            {
+                {
+                    "Character1",
+                    new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("BattleEquipment1") with { EquipmentType = "Battle" }
+                    }
+                }
+            }));
+    }
+
+    [Test]
+    public void NotGetCivilianCharacterEquipment_TaggedByEquipmentType()
+    {
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                {
+                    "Character1",
+                    new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("CivilianEquipment1") with { EquipmentType = "Civilian" }
+                    }
+                }
+            });
+
+        _civilianEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                {
+                    "Character1",
+                    new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("CivilianEquipment1") with { EquipmentType = "Civilian" }
+                    }
+                }
+            });
+        _siegeEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+
+        var equipmentRosterByCharacter = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(equipmentRosterByCharacter, Is.EqualTo(
+            new Dictionary<string, List<EquipmentRoster>>
+            {
+                {
+                    "Character1", new List<EquipmentRoster>()
+                }
+            }));
+    }
+
+    [Test]
     public void NotGetSiegeCharacterEquipment()
     {
         _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
@@ -377,6 +458,60 @@ public class BattleEquipmentRosterProviderShould
                     }
                 }
             }));
+    }
+
+    [Test]
+    public void NotGetStealthCharacterEquipment()
+    {
+        EquipmentRoster stealthRoster = CreateEquipmentRoster("StealthEquipment") with
+        {
+            EquipmentType = "Stealth"
+        };
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                { "Character1", new List<EquipmentRoster> { stealthRoster } }
+            });
+        _civilianEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+        _siegeEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+        _stealthEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                { "Character1", new List<EquipmentRoster> { stealthRoster } }
+            });
+
+        var equipmentRosterByCharacter = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(equipmentRosterByCharacter["Character1"], Is.Empty);
+    }
+
+    [Test]
+    public void GetStealthCharacterEquipmentTaggedForBattleWithEquipmentTypes()
+    {
+        EquipmentRoster sharedRoster = CreateEquipmentRoster("SharedEquipment") with
+        {
+            EquipmentTypes = "Battle;Stealth"
+        };
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                { "Character1", new List<EquipmentRoster> { sharedRoster } }
+            });
+        _civilianEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+        _siegeEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>());
+        _stealthEquipmentRosterProvider.Setup(provider => provider.GetEquipmentRostersByCharacter())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                { "Character1", new List<EquipmentRoster> { sharedRoster } }
+            });
+
+        var equipmentRosterByCharacter = _battleEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(equipmentRosterByCharacter["Character1"], Is.EqualTo(new List<EquipmentRoster> { sharedRoster }));
     }
 
     private EquipmentRoster CreateEquipmentRoster(params string[] equipmentIds)

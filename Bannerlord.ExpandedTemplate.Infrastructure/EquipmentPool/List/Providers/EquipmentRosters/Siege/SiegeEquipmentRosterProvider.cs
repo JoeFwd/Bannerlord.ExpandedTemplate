@@ -20,7 +20,7 @@ public class SiegeEquipmentRosterProvider : IEquipmentRostersProvider
             .ToDictionary(character => character.Key, character => character.Value.Where(
                 equipmentRoster =>
                 {
-                    bool.TryParse(equipmentRoster.IsSiege, out bool isSiege);
+                    bool.TryParse(equipmentRoster.ResolvedIsSiege, out bool isSiege);
                     return isSiege;
                 }).ToList() as IList<EquipmentRoster>);
     }

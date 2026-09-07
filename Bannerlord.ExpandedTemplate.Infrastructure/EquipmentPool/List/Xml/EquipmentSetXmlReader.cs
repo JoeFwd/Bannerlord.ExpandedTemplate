@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.EquipmentRosters;
 
 namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Xml;
@@ -30,12 +31,20 @@ public class EquipmentSetXmlReader : IEquipmentSetXmlReader
             Id = e.Attribute("id")?.Value
         }).ToList();
 
+        string? equipmentType = root.Attribute("equipmentType")?.Value;
+        string? equipmentTypes = root.Attribute("equipmentTypes")?.Value;
+
         return new EquipmentSet
         {
             Equipment = equipments,
-            IsBattle = root.Attribute("battle")?.Value,
-            IsCivilian = root.Attribute("civilian")?.Value,
-            IsSiege = root.Attribute("siege")?.Value,
+            IsBattle = EquipmentTypeFlags.Resolve(root.Attribute("battle")?.Value, equipmentType, equipmentTypes,
+                EquipmentTypeFlags.Battle, true),
+            IsCivilian = EquipmentTypeFlags.Resolve(root.Attribute("civilian")?.Value, equipmentType, equipmentTypes,
+                EquipmentTypeFlags.Civilian, true),
+            IsSiege = EquipmentTypeFlags.Resolve(root.Attribute("siege")?.Value, equipmentType, equipmentTypes,
+                EquipmentTypeFlags.Siege, true),
+            IsStealth = EquipmentTypeFlags.Resolve(null, equipmentType, equipmentTypes, EquipmentTypeFlags.Stealth,
+                true),
             Pool = root.Attribute("pool")?.Value
         };
     }

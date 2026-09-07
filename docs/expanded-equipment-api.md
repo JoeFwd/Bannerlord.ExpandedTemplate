@@ -309,7 +309,7 @@ Currently, the system does not support user-defined probabilities for the pools.
 
 Thus, a pool with more `EquipmentRoster` has a higher likelihood of being selected. Note that civilian clothes are not considered in the probability calculation.
 
-### Defining Equipment Types for Battle, Siege, and Civilian Missions
+### Defining Equipment Types for Battle, Siege, Civilian, and Stealth Missions
 
 In the expanded randomisation system, you can assign equipment specifically for battle, siege, or civilian missions by using the `battle`, `siege`, and `civilian` flags in the `EquipmentRoster` or `EquipmentSet` nodes.
 
@@ -326,6 +326,36 @@ In the expanded randomisation system, you can assign equipment specifically for 
 - **`siege="true"`**: Siege-specific equipment.
 - **`civilian="true"`**: Civilian-specific equipment.
 - **Combined flags**: Equipment shared across multiple mission types.
+
+#### The `equipmentType` Attribute
+
+As an alternative to the `battle`, `siege`, and `civilian` boolean flags, you can tag an `EquipmentRoster` or `EquipmentSet` node with a single `equipmentType` attribute, using the same style as vanilla Bannerlord XML (e.g. `slot="Head"`):
+
+```xml
+<EquipmentRoster equipmentType="Civilian">
+    <equipment slot="Item0" id="Item.sword_civilian1"/>
+    <equipment slot="Body" id="Item.armor_civilian1"/>
+</EquipmentRoster>
+<EquipmentSet id="vlandia_troop_civilian_template_t1" equipmentType="Civilian"/>
+```
+
+Valid values are `Battle`, `Siege`, `Civilian`, and `Stealth`. `Battle`, `Civilian`, and `Stealth` match Bannerlord's native equipment types; `Siege` remains ExpandedTemplate's additional mission type. Stealth-tagged equipment is selected for missions running in Bannerlord's `Stealth` mode.
+
+`equipmentType` is purely an additional nomenclature: it does not replace the legacy flags, and the two can be mixed freely, including on the same node or across different nodes referenced by the same `EquipmentSet`. All existing `battle`/`siege`/`civilian` flag combinations described above, including the "no flags means battle" default and combining multiple flags on one node, continue to work unchanged.
+
+#### The `equipmentTypes` Attribute
+
+Use the plural `equipmentTypes` attribute when one node applies to multiple mission types. List type names separated by semicolons; whitespace around each value is ignored.
+
+```xml
+<EquipmentRoster equipmentTypes="Battle;Stealth">
+    <equipment slot="Item0" id="Item.light_sword"/>
+    <equipment slot="Body" id="Item.light_armor"/>
+</EquipmentRoster>
+<EquipmentSet id="vlandia_troop_stealth_template_t1" equipmentTypes="Battle;Stealth"/>
+```
+
+The valid list values are the same as `equipmentType`: `Battle`, `Siege`, `Civilian`, and `Stealth`. `equipmentTypes` can be used alongside `equipmentType` and the legacy boolean flags; the resulting node is available to every type declared by any of those attributes.
 
 #### Example XML Configurations
 

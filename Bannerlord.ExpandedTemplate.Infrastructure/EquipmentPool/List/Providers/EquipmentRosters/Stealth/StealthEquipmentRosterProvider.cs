@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Models.NpcCharacters;
 
-namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Civilian;
+namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Stealth;
 
-public class CivilianEquipmentRosterProvider : IEquipmentRostersProvider
+public class StealthEquipmentRosterProvider : IEquipmentRostersProvider
 {
     private readonly INpcCharacterWithResolvedEquipmentProvider _npcCharacterWithResolvedEquipmentProvider;
 
-    public CivilianEquipmentRosterProvider(
+    public StealthEquipmentRosterProvider(
         INpcCharacterWithResolvedEquipmentProvider npcCharacterWithResolvedEquipmentProvider)
     {
         _npcCharacterWithResolvedEquipmentProvider = npcCharacterWithResolvedEquipmentProvider;
@@ -20,8 +20,8 @@ public class CivilianEquipmentRosterProvider : IEquipmentRostersProvider
             .ToDictionary(character => character.Key, character => character.Value.Where(
                 equipmentRoster =>
                 {
-                    bool.TryParse(equipmentRoster.ResolvedIsCivilian, out bool isCivilian);
-                    return isCivilian;
+                    bool.TryParse(equipmentRoster.ResolvedIsStealth, out bool isStealth);
+                    return isStealth;
                 }).ToList() as IList<EquipmentRoster>);
     }
 }

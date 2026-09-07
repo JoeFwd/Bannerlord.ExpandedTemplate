@@ -21,13 +21,16 @@ public record EquipmentSet
 
     [XmlAttribute(AttributeName = "pool")] public string? Pool { get; init; }
 
+    [XmlIgnore]
+    public string? IsStealth { get; init; }
+
     public virtual bool Equals(EquipmentSet? other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
         return Equipment.SequenceEqual(other.Equipment) && IsBattle == other.IsBattle &&
                IsCivilian == other.IsCivilian &&
-               IsSiege == other.IsSiege && Pool == other.Pool;
+               IsSiege == other.IsSiege && IsStealth == other.IsStealth && Pool == other.Pool;
     }
 
     public override int GetHashCode()
@@ -39,6 +42,7 @@ public record EquipmentSet
             hashCode = (hashCode * 397) ^ (IsCivilian != null ? IsCivilian.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (IsSiege != null ? IsSiege.GetHashCode() : 0);
             hashCode = (hashCode * 397) ^ (Pool != null ? Pool.GetHashCode() : 0);
+            hashCode = (hashCode * 397) ^ (IsStealth != null ? IsStealth.GetHashCode() : 0);
 
             foreach (var equipment in Equipment) hashCode = hashCode * 31 + equipment.GetHashCode();
 

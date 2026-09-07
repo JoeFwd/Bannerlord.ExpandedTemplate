@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Bannerlord.ExpandedTemplate.Domain.Logging.Port;
 using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
@@ -11,15 +11,18 @@ public class BattleEquipmentRosterProvider : IEquipmentRostersProvider
     private readonly INpcCharacterWithResolvedEquipmentProvider _npcCharacterWithResolvedEquipmentProvider;
     private readonly IEquipmentRostersProvider _siegeEquipmentRosterProvider;
     private readonly IEquipmentRostersProvider _civilianEquipmentRosterProvider;
+    private readonly IEquipmentRostersProvider _stealthEquipmentRosterProvider;
 
     public BattleEquipmentRosterProvider(
         IEquipmentRostersProvider siegeEquipmentRosterProvider,
         IEquipmentRostersProvider civilianEquipmentRosterProvider,
+        IEquipmentRostersProvider stealthEquipmentRosterProvider,
         INpcCharacterWithResolvedEquipmentProvider npcCharacterWithResolvedEquipmentProvider)
     {
         _npcCharacterWithResolvedEquipmentProvider = npcCharacterWithResolvedEquipmentProvider;
         _siegeEquipmentRosterProvider = siegeEquipmentRosterProvider;
         _civilianEquipmentRosterProvider = civilianEquipmentRosterProvider;
+        _stealthEquipmentRosterProvider = stealthEquipmentRosterProvider;
     }
 
     public IDictionary<string, IList<EquipmentRoster>> GetEquipmentRostersByCharacter()
@@ -40,11 +43,14 @@ public class BattleEquipmentRosterProvider : IEquipmentRostersProvider
         IDictionary<string, IList<EquipmentRoster>> siegeEquipmentRostersByCharacter =
             _siegeEquipmentRosterProvider.GetEquipmentRostersByCharacter();
 
+        IDictionary<string, IList<EquipmentRoster>> stealthEquipmentRostersByCharacter =
+            _stealthEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
         return equipmentRostersByCharacterId
             .ToDictionary(character => character.Key, character => character.Value.Where(
                 equipmentRoster =>
                 {
-                    if (bool.TryParse(equipmentRoster.IsBattle, out bool isBattle))
+                    if (bool.TryParse(equipmentRoster.ResolvedIsBattle, out bool isBattle))
                         if (isBattle)
                             return true;
 
@@ -56,6 +62,11 @@ public class BattleEquipmentRosterProvider : IEquipmentRostersProvider
                     if (siegeEquipmentRostersByCharacter.TryGetValue(character.Key,
                             out IList<EquipmentRoster> siegeEquipmentRosters))
                         if (siegeEquipmentRosters.Contains(equipmentRoster))
+                            return false;
+
+                    if (stealthEquipmentRostersByCharacter.TryGetValue(character.Key,
+                            out IList<EquipmentRoster> stealthEquipmentRosters))
+                        if (stealthEquipmentRosters.Contains(equipmentRoster))
                             return false;
 
                     return true;

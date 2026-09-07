@@ -74,6 +74,36 @@ public class CivilianEquipmentRosterProviderShould
     }
 
     [Test]
+    public void GetCivilianEquipmentRosters_TaggedByEquipmentType()
+    {
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                {
+                    "Character1", new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("Equipment1", "Equipment2"),
+                        CreateEquipmentRoster("Equipment3", "Equipment4") with { EquipmentType = "Civilian" }
+                    }
+                }
+            });
+
+        var civilianEquipmentRostersByCharacter =
+            _civilianEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(civilianEquipmentRostersByCharacter, Is.EqualTo(
+            new Dictionary<string, List<EquipmentRoster>>
+            {
+                {
+                    "Character1", new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("Equipment3", "Equipment4") with { EquipmentType = "Civilian" }
+                    }
+                }
+            }));
+    }
+
+    [Test]
     public void NotReturnEquipmentPools_WhenInvalidSymbolsAreUsedInCondition()
     {
         _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())

@@ -17,6 +17,7 @@ public class EquipmentSetMapper : IEquipmentSetMapper
             IsBattle = equipmentSet.IsBattle,
             IsCivilian = equipmentSet.IsCivilian,
             IsSiege = equipmentSet.IsSiege,
+            IsStealth = equipmentSet.IsStealth,
             Pool = equipmentSet.Pool,
             Equipment = equipmentSet.Equipment?.Select(equipment => new Equipment
             {

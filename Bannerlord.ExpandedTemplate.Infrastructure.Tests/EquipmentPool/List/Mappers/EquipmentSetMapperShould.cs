@@ -8,8 +8,10 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.Tests.EquipmentPool.List.Ma
 public class EquipmentSetMapperShould
 {
     private const string Pool = "irrelevant_pool_id";
+    private const string IsBattle = "irrelevant_battle_flag";
     private const string IsCivilian = "irrelevant_civilian_flag";
     private const string IsSiege = "irrelevant_siege_flag";
+    private const string IsStealth = "irrelevant_stealth_flag";
     private const string Slot1 = "irrelevant_slot1";
     private const string Slot2 = "irrelevant_slot2";
     private const string EquipmentId1 = "irrelevant_equipment_id1";
@@ -35,8 +37,10 @@ public class EquipmentSetMapperShould
         EquipmentSet equipmentSet = new EquipmentSet
         {
             Pool = Pool,
+            IsBattle = IsBattle,
             IsCivilian = IsCivilian,
             IsSiege = IsSiege,
+            IsStealth = IsStealth,
             Equipment = new List<Equipment>
             {
                 new() { Slot = Slot1, Id = EquipmentId1 },
@@ -49,8 +53,10 @@ public class EquipmentSetMapperShould
         Assert.That(equipmentRoster, Is.EqualTo(new EquipmentRoster
         {
             Pool = Pool,
+            IsBattle = IsBattle,
             IsCivilian = IsCivilian,
             IsSiege = IsSiege,
+            IsStealth = IsStealth,
             Equipment = new List<Infrastructure.EquipmentPool.List.Models.NpcCharacters.Equipment>
             {
                 new() { Slot = Slot1, Id = EquipmentId1 },
@@ -65,8 +71,10 @@ public class EquipmentSetMapperShould
         EquipmentSet equipmentSet = new EquipmentSet
         {
             Pool = null,
+            IsBattle = null,
             IsCivilian = null,
             IsSiege = null,
+            IsStealth = null,
             Equipment = null
         };
 
@@ -75,8 +83,10 @@ public class EquipmentSetMapperShould
         Assert.That(equipmentRoster, Is.EqualTo(new EquipmentRoster
         {
             Pool = null,
+            IsBattle = null,
             IsCivilian = null,
             IsSiege = null,
+            IsStealth = null,
             Equipment = new List<Infrastructure.EquipmentPool.List.Models.NpcCharacters.Equipment>()
         }));
     }

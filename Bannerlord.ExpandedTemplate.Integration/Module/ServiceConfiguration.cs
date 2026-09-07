@@ -6,6 +6,7 @@ using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Battle;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Civilian;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Siege;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.Get.Stealth;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Mappers;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentPool;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters;
@@ -13,6 +14,7 @@ using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.Eq
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Civilian;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Pool;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Siege;
+using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentRosters.Stealth;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Repositories;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Xml;
 using Bannerlord.ExpandedTemplate.Integration.EquipmentPool;
@@ -48,6 +50,7 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             services.AddSingleton<IEquipmentSetXmlReader, EquipmentSetXmlReader>();
 
             // Register mappers
+            services.AddSingleton<EquipmentSetFlagMapper>();
             services.AddSingleton<IEquipmentSetMapper, EquipmentSetMapper>();
             services.AddSingleton<IEquipmentRosterMapper, EquipmentRosterMapper>();
             services.AddSingleton<INpcCharacterMapper, NpcCharacterMapper>();
@@ -61,10 +64,12 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
             // Register equipment roster providers
             services.AddSingleton<SiegeEquipmentRosterProvider>();
             services.AddSingleton<CivilianEquipmentRosterProvider>();
+            services.AddSingleton<StealthEquipmentRosterProvider>();
             services.AddSingleton<BattleEquipmentRosterProvider>(sp =>
                 new BattleEquipmentRosterProvider(
                     sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
                     sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
+                    sp.GetRequiredService<StealthEquipmentRosterProvider>(),
                     sp.GetRequiredService<INpcCharacterWithResolvedEquipmentProvider>()));
 
             // Register equipment provider services - each wired to its own EquipmentPoolsProvider
@@ -92,6 +97,15 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
                     sp.GetRequiredService<ILoggerFactory>(),
                     new EquipmentPoolsProvider(
                         sp.GetRequiredService<CivilianEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>())));
+
+            services.AddSingleton<ITroopStealthEquipmentProvider>(sp =>
+                new TroopStealthEquipmentPoolProvider(
+                    sp.GetRequiredService<ILoggerFactory>(),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<StealthEquipmentRosterProvider>(),
                         sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
                         sp.GetRequiredService<IEquipmentRosterMapper>(),
                         sp.GetRequiredService<ICachingProvider>())));
@@ -126,6 +140,11 @@ namespace Bannerlord.ExpandedTemplate.Integration.Module
                         sp.GetRequiredService<ICachingProvider>()),
                     new EquipmentPoolsProvider(
                         sp.GetRequiredService<SiegeEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
+                        sp.GetRequiredService<IEquipmentRosterMapper>(),
+                        sp.GetRequiredService<ICachingProvider>()),
+                    new EquipmentPoolsProvider(
+                        sp.GetRequiredService<StealthEquipmentRosterProvider>(),
                         sp.GetRequiredService<IPoolEquipmentRosterProvider>(),
                         sp.GetRequiredService<IEquipmentRosterMapper>(),
                         sp.GetRequiredService<ICachingProvider>())));

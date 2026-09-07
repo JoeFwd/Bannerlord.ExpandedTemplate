@@ -16,6 +16,7 @@ public class GetEquipmentPoolsUtil : IGetEquipmentPoolsUtil
     private readonly ITroopBattleEquipmentProvider _troopBattleEquipmentProvider;
     private readonly ITroopSiegeEquipmentProvider _troopSiegeEquipmentProvider;
     private readonly ITroopCivilianEquipmentProvider _troopCivilianEquipmentProvider;
+    private readonly ITroopStealthEquipmentProvider _troopStealthEquipmentProvider;
     private readonly ILogger _logger;
 
     public GetEquipmentPoolsUtil(
@@ -23,12 +24,14 @@ public class GetEquipmentPoolsUtil : IGetEquipmentPoolsUtil
         ITroopBattleEquipmentProvider troopBattleEquipmentProvider,
         ITroopSiegeEquipmentProvider troopSiegeEquipmentProvider,
         ITroopCivilianEquipmentProvider troopCivilianEquipmentProvider,
+        ITroopStealthEquipmentProvider troopStealthEquipmentProvider,
         ILoggerFactory loggerFactory)
     {
         _encounterTypeProvider = encounterTypeProvider;
         _troopBattleEquipmentProvider = troopBattleEquipmentProvider;
         _troopSiegeEquipmentProvider = troopSiegeEquipmentProvider;
         _troopCivilianEquipmentProvider = troopCivilianEquipmentProvider;
+        _troopStealthEquipmentProvider = troopStealthEquipmentProvider;
         _logger = loggerFactory.CreateLogger<GetEquipmentPoolsUtil>();
     }
 
@@ -42,6 +45,7 @@ public class GetEquipmentPoolsUtil : IGetEquipmentPoolsUtil
             EncounterType.Battle => _troopBattleEquipmentProvider.GetBattleTroopEquipmentPools(troopId),
             EncounterType.Siege => _troopSiegeEquipmentProvider.GetSiegeTroopEquipmentPools(troopId),
             EncounterType.Civilian => _troopCivilianEquipmentProvider.GetCivilianTroopEquipmentPools(troopId),
+            EncounterType.Stealth => _troopStealthEquipmentProvider.GetStealthTroopEquipmentPools(troopId),
             _ => _troopBattleEquipmentProvider.GetBattleTroopEquipmentPools(troopId)
         };
 

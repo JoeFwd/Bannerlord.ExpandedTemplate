@@ -15,16 +15,19 @@ namespace Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Mappers;
 public class NpcCharacterMapper : INpcCharacterMapper
 {
     private readonly IEquipmentRosterRepository _equipmentRosterRepository;
+    private readonly EquipmentSetFlagMapper _equipmentSetFlagMapper;
     private readonly IEquipmentSetMapper _equipmentSetMapper;
     private readonly ILogger _logger;
 
     public NpcCharacterMapper(
         IEquipmentRosterRepository equipmentRosterRepository,
         IEquipmentSetMapper equipmentSetMapper,
+        EquipmentSetFlagMapper equipmentSetFlagMapper,
         ILoggerFactory loggerFactory)
     {
         _equipmentRosterRepository = equipmentRosterRepository;
         _equipmentSetMapper = equipmentSetMapper;
+        _equipmentSetFlagMapper = equipmentSetFlagMapper;
         _logger = loggerFactory.CreateLogger<NpcCharacterMapper>();
     }
 
@@ -45,7 +48,7 @@ public class NpcCharacterMapper : INpcCharacterMapper
             }
 
             var mappedRosters = matchingRoster.EquipmentSet
-                .Where(set => IsMatchingSet(set, characterSet))
+                .Where(set => _equipmentSetFlagMapper.IsMatching(set, characterSet))
                 .Select(_equipmentSetMapper.MapToEquipmentRoster);
 
             equipmentRosters.AddRange(mappedRosters);
@@ -80,26 +83,4 @@ public class NpcCharacterMapper : INpcCharacterMapper
         return result;
     }
 
-    private static bool IsMatchingSet(RosterEquipmentSet set, NpcEquipmentSet characterSet)
-    {
-        bool allFlagsFalseOnSet = AllFalse(set.IsCivilian, set.IsSiege, set.IsBattle);
-        bool allFlagsFalseOnCharacter = AllFalse(characterSet.IsCivilian, characterSet.IsSiege, characterSet.IsBattle);
-
-        return MatchesFlag(characterSet.IsCivilian, set.IsCivilian) ||
-               MatchesFlag(characterSet.IsSiege, set.IsSiege) ||
-               MatchesFlag(characterSet.IsBattle, set.IsBattle) ||
-               (allFlagsFalseOnSet && allFlagsFalseOnCharacter);
-    }
-
-
-    private static bool AllFalse(params string?[] flags)
-    {
-        return flags.All(flag => !bool.TrueString.Equals(flag, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static bool MatchesFlag(string? characterFlag, string? setFlag)
-    {
-        return bool.TrueString.Equals(characterFlag, StringComparison.OrdinalIgnoreCase) &&
-               (setFlag == null || bool.TrueString.Equals(setFlag, StringComparison.OrdinalIgnoreCase));
-    }
 }

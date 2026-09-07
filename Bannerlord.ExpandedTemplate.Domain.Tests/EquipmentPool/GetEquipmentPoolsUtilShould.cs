@@ -14,6 +14,7 @@ public class GetEquipmentPoolsUtilShould
     private Mock<ITroopBattleEquipmentProvider> _troopBattleEquipmentProvider;
     private Mock<ITroopSiegeEquipmentProvider> _troopSiegeEquipmentProvider;
     private Mock<ITroopCivilianEquipmentProvider> _troopCivilianEquipmentProvider;
+    private Mock<ITroopStealthEquipmentProvider> _troopStealthEquipmentProvider;
     private Mock<IEncounterTypeProvider> _encounterTypeProvider;
     private Mock<ILoggerFactory> _loggerFactory;
     private Mock<ILogger> _logger;
@@ -25,6 +26,7 @@ public class GetEquipmentPoolsUtilShould
         _troopBattleEquipmentProvider = new Mock<ITroopBattleEquipmentProvider>();
         _troopSiegeEquipmentProvider = new Mock<ITroopSiegeEquipmentProvider>();
         _troopCivilianEquipmentProvider = new Mock<ITroopCivilianEquipmentProvider>();
+        _troopStealthEquipmentProvider = new Mock<ITroopStealthEquipmentProvider>();
         _encounterTypeProvider = new Mock<IEncounterTypeProvider>();
         _logger = new Mock<ILogger>();
         _loggerFactory = new Mock<ILoggerFactory>();
@@ -32,7 +34,7 @@ public class GetEquipmentPoolsUtilShould
             .Returns(_logger.Object);
         _getEquipmentPoolsUtil = new GetEquipmentPoolsUtil(_encounterTypeProvider.Object,
             _troopBattleEquipmentProvider.Object, _troopSiegeEquipmentProvider.Object,
-            _troopCivilianEquipmentProvider.Object, _loggerFactory.Object);
+            _troopCivilianEquipmentProvider.Object, _troopStealthEquipmentProvider.Object, _loggerFactory.Object);
     }
 
     [Test]
@@ -73,6 +75,20 @@ public class GetEquipmentPoolsUtilShould
             .Returns(EncounterType.Civilian);
         _troopCivilianEquipmentProvider.Setup(troopCivilianEquipmentProvider =>
                 troopCivilianEquipmentProvider.GetCivilianTroopEquipmentPools(TroopId))
+            .Returns(equipmentPools);
+
+        var equipment = _getEquipmentPoolsUtil.GetEquipmentPools(TroopId);
+
+        Assert.That(equipment, Is.EqualTo(equipmentPools));
+    }
+
+    [Test]
+    public void ReturnStealthEquipmentPoolsWhenEncounterIsStealth()
+    {
+        var equipmentPools = new List<Domain.EquipmentPool.Model.EquipmentPool> { _equipmentPool };
+        _encounterTypeProvider.Setup(encounterProvider => encounterProvider.GetEncounterType())
+            .Returns(EncounterType.Stealth);
+        _troopStealthEquipmentProvider.Setup(provider => provider.GetStealthTroopEquipmentPools(TroopId))
             .Returns(equipmentPools);
 
         var equipment = _getEquipmentPoolsUtil.GetEquipmentPools(TroopId);
@@ -136,6 +152,25 @@ public class GetEquipmentPoolsUtilShould
             logger => logger.Warn(
                 It.Is<string>(m =>
                     m.Equals($"No equipment found for troop '{TroopId}' in {EncounterType.Siege} encounter.")),
+                null),
+            Times.Once);
+    }
+
+    [Test]
+    public void LogWhenNoStealthEquipment()
+    {
+        var equipmentPools = new List<Domain.EquipmentPool.Model.EquipmentPool>();
+        _encounterTypeProvider.Setup(encounterProvider => encounterProvider.GetEncounterType())
+            .Returns(EncounterType.Stealth);
+        _troopStealthEquipmentProvider.Setup(provider => provider.GetStealthTroopEquipmentPools(TroopId))
+            .Returns(equipmentPools);
+
+        _getEquipmentPoolsUtil.GetEquipmentPools(TroopId);
+
+        _logger.Verify(
+            logger => logger.Warn(
+                It.Is<string>(m =>
+                    m.Equals($"No equipment found for troop '{TroopId}' in {EncounterType.Stealth} encounter.")),
                 null),
             Times.Once);
     }

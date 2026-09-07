@@ -1,5 +1,6 @@
 ﻿using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Model;
 using Bannerlord.ExpandedTemplate.Domain.EquipmentPool.Port;
+using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
 
 namespace Bannerlord.ExpandedTemplate.Integration.EquipmentPool.Spi
@@ -12,6 +13,7 @@ namespace Bannerlord.ExpandedTemplate.Integration.EquipmentPool.Spi
             if (currentMission == null) return EncounterType.None;
 
             if (currentMission.IsSiegeBattle || currentMission.IsSallyOutBattle) return EncounterType.Siege;
+            if (currentMission.Mode == MissionMode.Stealth) return EncounterType.Stealth;
             if (currentMission.IsFriendlyMission) return EncounterType.Civilian;
             return EncounterType.Battle;
         }

@@ -5,6 +5,7 @@
         None,
         Battle,
         Siege,
-        Civilian
+        Civilian,
+        Stealth
     }
 }

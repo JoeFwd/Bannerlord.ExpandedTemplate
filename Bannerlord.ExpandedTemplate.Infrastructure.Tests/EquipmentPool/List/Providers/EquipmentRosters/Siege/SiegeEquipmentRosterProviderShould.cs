@@ -74,6 +74,36 @@ public class SiegeEquipmentRosterProviderShould
     }
 
     [Test]
+    public void GetSiegeEquipmentRosters_TaggedByEquipmentType()
+    {
+        _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())
+            .Returns(new Dictionary<string, IList<EquipmentRoster>>
+            {
+                {
+                    "Character1", new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("Equipment1", "Equipment2"),
+                        CreateEquipmentRoster("Equipment3", "Equipment4") with { EquipmentType = "Siege" }
+                    }
+                }
+            });
+
+        var siegeEquipmentRostersByCharacter =
+            _siegeEquipmentRosterProvider.GetEquipmentRostersByCharacter();
+
+        Assert.That(siegeEquipmentRostersByCharacter, Is.EqualTo(
+            new Dictionary<string, List<EquipmentRoster>>
+            {
+                {
+                    "Character1", new List<EquipmentRoster>
+                    {
+                        CreateEquipmentRoster("Equipment3", "Equipment4") with { EquipmentType = "Siege" }
+                    }
+                }
+            }));
+    }
+
+    [Test]
     public void NotReturnEquipmentPools_WhenInvalidSymbolsAreUsedInCondition()
     {
         _npcCharacterWithResolvedEquipmentProvider.Setup(repo => repo.GetNpcCharactersWithResolvedEquipmentRoster())

@@ -1,4 +1,4 @@
-﻿using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
+using Bannerlord.ExpandedTemplate.Infrastructure.Caching;
 using Bannerlord.ExpandedTemplate.Infrastructure.EquipmentPool.List.Providers.EquipmentPool;
 using TaleWorlds.CampaignSystem;
 
@@ -8,7 +8,8 @@ public class CampaignLoadEquipmentPoolHandler(
     ICacheInvalidator cacheInvalidator,
     IEquipmentPoolsProvider battleEquipmentPoolsProviders,
     IEquipmentPoolsProvider civilianEquipmentPoolsProviders,
-    IEquipmentPoolsProvider siegeEquipmentPoolsProviders) : CampaignBehaviorBase
+    IEquipmentPoolsProvider siegeEquipmentPoolsProviders,
+    IEquipmentPoolsProvider stealthEquipmentPoolsProviders) : CampaignBehaviorBase
 {
     public override void RegisterEvents()
     {
@@ -25,6 +26,7 @@ public class CampaignLoadEquipmentPoolHandler(
         battleEquipmentPoolsProviders.GetEquipmentPoolsByCharacterId();
         civilianEquipmentPoolsProviders.GetEquipmentPoolsByCharacterId();
         siegeEquipmentPoolsProviders.GetEquipmentPoolsByCharacterId();
+        stealthEquipmentPoolsProviders.GetEquipmentPoolsByCharacterId();
     }
 
     private void OnAfterSessionLaunched()

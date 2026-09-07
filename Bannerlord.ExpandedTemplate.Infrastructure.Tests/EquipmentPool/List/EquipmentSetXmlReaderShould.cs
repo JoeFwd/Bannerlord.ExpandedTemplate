@@ -98,4 +98,46 @@ public class EquipmentSetXmlReaderShould
         Assert.IsNotNull(result, "Reader should return a non‑null EquipmentSet for an upper‑case root element.");
         Assert.That(result!.Equipment.Count, Is.EqualTo(1), "Expected exactly one equipment entry.");
     }
+
+    [Test]
+    public void Resolve_EquipmentType_Attribute_ToFlags()
+    {
+        var xml = new XDocument(
+            new XElement("EquipmentSet",
+                new XAttribute("equipmentType", "Civilian"),
+                new XElement("Equipment",
+                    new XAttribute("slot", "slot1"),
+                    new XAttribute("id", "123")
+                )
+            )
+        );
+
+        var result = _reader.Read(xml.ToString());
+
+        Assert.IsNotNull(result, "Reader should return a non‑null EquipmentSet for a valid root.");
+        Assert.Multiple(() =>
+        {
+            Assert.That(result!.IsBattle, Is.EqualTo(bool.FalseString));
+            Assert.That(result.IsCivilian, Is.EqualTo(bool.TrueString));
+            Assert.That(result.IsSiege, Is.EqualTo(bool.FalseString));
+            Assert.That(result.IsStealth, Is.EqualTo(bool.FalseString));
+        });
+    }
+
+    [Test]
+    public void Resolve_EquipmentTypes_Attribute_ToFlags()
+    {
+        var xml = new XDocument(
+            new XElement("EquipmentSet", new XAttribute("equipmentTypes", "Battle;Stealth")));
+
+        EquipmentSet? result = _reader.Read(xml.ToString());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result!.IsBattle, Is.EqualTo(bool.TrueString));
+            Assert.That(result.IsCivilian, Is.EqualTo(bool.FalseString));
+            Assert.That(result.IsSiege, Is.EqualTo(bool.FalseString));
+            Assert.That(result.IsStealth, Is.EqualTo(bool.TrueString));
+        });
+    }
 }
