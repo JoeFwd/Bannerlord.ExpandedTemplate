@@ -11,7 +11,7 @@
         <PackageProjectUrl>https://github.com/JoeFwd/Bannerlord.ExpandedTemplate</PackageProjectUrl>
 
         <CopyLocalLockFileAssemblies>True</CopyLocalLockFileAssemblies>
-        <GameFolder>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\..\..'))</GameFolder>
+        <GameFolder Condition="Exists('$(MSBuildProjectDirectory)\..\..\..\..\..\..\bin\Win64_Shipping_Client\Bannerlord.exe')">$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\..\..\..\..'))</GameFolder>
     </PropertyGroup>
 
     <ItemGroup>

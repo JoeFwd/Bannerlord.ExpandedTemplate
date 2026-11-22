@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bannerlord.ReferenceAssemblies.Core" Version="$(GameVersion).*-*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
     <PackageReference Include="Moq" Version="4.20.70"/>
     <PackageReference Include="NUnit" Version="3.13.3"/>
@@ -24,20 +25,8 @@
     <ProjectReference Include="..\Bannerlord.ExpandedTemplate.Infrastructure\Bannerlord.ExpandedTemplate.Infrastructure.csproj" />
   </ItemGroup>
 
-  <!-- Reference TaleWorlds assemblies from GameFolder -->
-  <ItemGroup>
-    <Reference Include="$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.Core.dll">
-      <HintPath>%(Identity)</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.ObjectSystem.dll">
-      <HintPath>%(Identity)</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-
   <!-- Custom target to copy TaleWorlds assemblies to output directory -->
-  <Target Name="CopyTaleWorldsAssemblies" BeforeTargets="Build">
+  <Target Name="CopyTaleWorldsAssemblies" BeforeTargets="Build" Condition="Exists('$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.Core.dll')">
     <ItemGroup>
       <TaleWorldsAssemblies Include="$(GameFolder)\bin\Win64_Shipping_Client\TaleWorlds.*.dll" />
     </ItemGroup>
