@@ -14,6 +14,9 @@ jobs:
   build-module:
     runs-on: ubuntu-latest
     needs: [ "run-unit-tests" ]
+    outputs:
+      mod_version: ${{ steps.changelog.outputs.mod_version }}
+      mod_description: ${{ steps.changelog.outputs.mod_description }}
     steps:
       - uses: actions/checkout@v2
       - name: Setup .NET
@@ -41,12 +44,14 @@ jobs:
         id: changelog
         run: |
           vers="$(bannerlord_changelog_parser latestversion -f "$PWD/changelog.txt")"
-          echo "::set-output name=mod_version::$vers"
+          echo "mod_version=$vers" >> "$GITHUB_OUTPUT"
           desc="$(bannerlord_changelog_parser fulldescription -f "$PWD/changelog.txt")"
-          desc="${desc//'%'/'%25'}"
-          desc="${desc//$'\n'/'%0A'}"
-          desc="${desc//$'\r'/'%0D'}"
-          echo "::set-output name=mod_description::$desc"
+          eof="EOF_$(openssl rand -hex 16)"
+          {
+            echo "mod_description<<$eof"
+            echo "$desc"
+            echo "$eof"
+          } >> "$GITHUB_OUTPUT"
       - name: Upload bannerlord folder
         uses: actions/upload-artifact@v4
         with:

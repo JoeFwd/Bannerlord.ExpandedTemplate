@@ -4,10 +4,17 @@
 functionality of existing XML templates in the game, providing modular C# components and an integrated logging system
 for easier debugging and development.
 
+Version **2.0.0** targets **Bannerlord v1.4.6**. For Bannerlord v1.2.12, use ExpandedTemplate 1.3.1.
+When upgrading from 1.3.1, update the XML submodule entry point to
+`Bannerlord.ExpandedTemplate.Integration.ExpandedTemplateSubModule` and rebuild dependent mods.
+The `BannerlordExpandedTemplateApi.Bind()` and `UseLoggerFactory()` methods remain available.
+See [the changelog](changelog.txt) for the full migration notes.
+
 ## Features
 
 - **Expanded Equipment API**:
     - Supports siege equipment templates.
+    - Supports stealth mission equipment and the `equipmentType` and `equipmentTypes` XML attributes.
     - Allows multiple equipment pools.
     - Any **civilian** mission now reads only civilian XML equipment templates. Bannerlord previously had inconsistencies such as:
         - Mercenaries using battle equipment in taverns while other characters use civilian templates in a supposedly "friendly" mission.
@@ -33,7 +40,7 @@ This method leverages Bannerlord's ability to load multiple `SubModules` from a 
    <SubModule>
         <Name value="Bannerlord.ExpandedTemplate" />
         <DLLName value="Bannerlord.ExpandedTemplate.Integration.dll" />
-        <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.SubModule" />
+        <SubModuleClassType value="Bannerlord.ExpandedTemplate.Integration.ExpandedTemplateSubModule" />
         <Tags/>
    </SubModule>
    ```
@@ -45,7 +52,7 @@ This method leverages Bannerlord's ability to load multiple `SubModules` from a 
 1. **Add the mod as a dependency**: Reference the NuGet library in your C# project by adding this to your `.csproj` file:
 
    ```xml
-   <PackageReference Include="Bannerlord.ExpandedTemplate.API" Version="1.0.0" />
+   <PackageReference Include="Bannerlord.ExpandedTemplate.API" Version="2.0.0" />
    ```
 
 2. **Mod Initialization**: In your C# `SubModule` constructor, initialize the expanded template:
